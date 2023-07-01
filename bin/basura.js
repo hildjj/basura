@@ -1,21 +1,28 @@
 #!/usr/bin/env node
-'use strict'
+/* eslint-disable no-console */
 
-const Basura = require('../lib/index')
-const fs = require('fs')
-const util = require('util')
-const pkg = require('../package.json')
-const commander = require('commander')
+import {Command, InvalidOptionArgumentError} from 'commander'
+import {Basura} from '../lib/index.js'
+import {fileURLToPath} from 'url'
+import fs from 'fs'
+import path from 'path'
+import util from 'util'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
 
 function myParseInt(value, dummyPrevious) {
   const v = parseInt(value, 10)
   if (isNaN(v)) {
-    throw new commander.InvalidOptionArgumentError('Not a number.')
+    throw new InvalidOptionArgumentError('Not a number.')
   }
   return v
 }
 
-const opts = commander.program
+const program = new Command()
+const opts = program
   .version(pkg.version)
   .usage('[options]')
   .description('Generate a random JavaScript object')
@@ -55,6 +62,7 @@ function main() {
   if (opts.type) {
     const t = opts.type
     delete opts.type
+    // eslint-disable-next-line no-useless-call
     obj = g[`generate_${t}`].call(g)
   } else {
     obj = g.generate()
@@ -64,7 +72,7 @@ function main() {
     JSON.stringify(obj, null, 2) :
     util.inspect(obj, {
       depth: Infinity,
-      colors: !opts.output && process.stdout.isTTY
+      colors: !opts.output && process.stdout.isTTY,
     })
   let out = process.stdout
   if (opts.output) {
@@ -72,9 +80,7 @@ function main() {
       out = fs.createWriteStream(opts.output)
     }
     if (!opts.json) {
-      out.write(`\
-'use strict'
-module.exports = `)
+      out.write('export default ')
       str = Basura.quoteSymbols(str)
     }
   }

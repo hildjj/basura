@@ -1,10 +1,12 @@
-'use strict'
+import {UnicodeTrieBuilder} from '@cto.af/unicode-trie/builder.js'
+import codePoints from 'codepoints'
+import {fileURLToPath} from 'url'
+import fs from 'fs'
+import {parseFile} from '@fast-csv/parse'
+import path from 'path'
 
-const path = require('path')
-const fs = require('fs')
-const codePoints = require('codepoints')
-const UnicodeTrieBuilder = require('unicode-trie/builder')
-const { parseFile } = require('@fast-csv/parse')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const log2 = Math.log2 || (n => Math.log(n) / Math.LN2)
 const bits = n => (log2(n) + 1) | 0
@@ -34,7 +36,7 @@ for (const codePoint of codePoints) {
       scripts[codePoint.script] = {
         num: scriptCount++,
         first: codePoint.code,
-        count: 0
+        count: 0,
       }
     }
     scripts[codePoint.script].last = codePoint.code
@@ -47,7 +49,7 @@ function idna() {
     const all = []
     parseFile(
       path.join(DATA, 'idna-tables-properties.csv'),
-      { headers: true }
+      {headers: true}
     )
       .on('data', ({Codepoint, Property}) => {
         if (Property !== 'UNASSIGNED') {
@@ -82,13 +84,14 @@ function idna() {
           for (let i = start; i <= end; i++) {
             const cp = codes[i]
             if (!cp) {
+              //
               // console.log(
               //   `Invalid code: 0x${i.toString(16)},\
               //    ${Property}, ${Codepoint}`
               // )
               continue
             }
-            // version mismatch between codepoints database and IANA table
+            // Version mismatch between codepoints database and IANA table
             // means some scripts won't have any characters
             scripts[cp.script].count++
             trie.set(i,
@@ -105,8 +108,8 @@ function idna() {
 async function main() {
   const trie = await idna()
   await fs.promises.writeFile(
-    path.join(DATA, 'data.trie'),
-    trie.toBuffer()
+    path.join(__dirname, '..', 'lib', 'data.js'),
+    trie.toModule({quot: "'", semi: ''})
   )
 
   const scriptA = []
@@ -126,7 +129,7 @@ async function main() {
     scriptShift,
     propertyShift: 0,
     invalid: 1 << invalid,
-    error: 1 << (invalid + 1)
+    error: 1 << (invalid + 1),
   }
   await fs.promises.writeFile(
     path.join(DATA, 'data.json'),
@@ -134,4 +137,5 @@ async function main() {
   )
 }
 
+// eslint-disable-next-line no-console
 main().catch(console.error)

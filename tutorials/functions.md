@@ -49,5 +49,3 @@ output of `f.toString()` in node 14 and higher:
 
 Notes:
  * for all of the async variants, whitespace is preserved around the '*'
- * Node 10-12 generate completely different inspect strings.  I don't test
-   generate_function on those versions, but it still works.

@@ -1,12 +1,10 @@
-'use strict'
-
-const test = require('ava')
-const Basura = require('../lib/index')
-const util = require('util')
-const Module = require('module')
-
-const example = require('./fixtures/example.js')
-const Arusab = require('./fixtures/un.js')
+import {Arusab} from './fixtures/un.js'
+import {Basura} from '../lib/index.js'
+import {Buffer} from 'buffer'
+import Module from 'module'
+import example from './fixtures/example.js'
+import test from 'ava'
+import util from 'util'
 
 test('create', t => {
   const first = new Basura()
@@ -14,7 +12,7 @@ test('create', t => {
 
   const small = new Basura({
     extra: false,
-    depth: -1
+    depth: -1,
   })
   const a = small.generate_Array()
   t.deepEqual(a, [])
@@ -23,35 +21,32 @@ test('create', t => {
 test('constructor edges', t => {
   const f = new Basura()
   const g = new Basura({
-    types: { Array: null }
+    types: {Array: null},
   })
   t.not(Object.keys(f.opts.types).length, Object.keys(g.opts.types).length)
-  // const h = new Basura({
-  //   types: []
-  // })
 })
 
 test('playback', t => {
   const un = new Arusab({
-    arrayLength: 1000
+    arrayLength: 1000,
   })
   un.generate(example)
 
   let g = new Basura({
     randBytes: un.playback.bind(un),
-    arrayLength: 1000
+    arrayLength: 1000,
   })
 
   let o = g.generate()
   t.deepEqual(o, example)
 
-  // with output
+  // With output
   un.generate(example)
 
   g = new Basura({
     randBytes: un.playback.bind(un),
     output: true,
-    arrayLength: 1000
+    arrayLength: 1000,
   })
 
   o = g.generate()
@@ -91,15 +86,15 @@ test('depth', t => {
 
 test('cbor/json safe', t => {
   let g = new Basura({
-    cborSafe: true
+    cborSafe: true,
   })
-  t.falsy(g.typeNames['Boolean'])
+  t.falsy(g.typeNames.Boolean)
   t.is(g.generate_RegExp().flags, '')
 
   g = new Basura({
-    jsonSafe: true
+    jsonSafe: true,
   })
-  t.falsy(g.typeNames['NaN'])
+  t.falsy(g.typeNames.NaN)
 })
 
 test('unspecified', t => {
@@ -148,10 +143,10 @@ test('functions', t => {
     return
   }
   const un = new Arusab({
-    arrayLength: 1000
+    arrayLength: 1000,
   })
 
-  // these are needed for the evals, which eslint can't see into.
+  // These are needed for the evals, which eslint can't see into.
   // eslint-disable-next-line no-unused-vars, prefer-const
   let f1 = null
   // eslint-disable-next-line no-unused-vars, prefer-const
@@ -164,6 +159,7 @@ test('functions', t => {
     // [Function (anonymous)]
     () => 'foo',
     // [Function: anonymous],
+    // eslint-disable-next-line no-new-func
     new Function(`return '${val}'`),
     // [Function: f1]
     // eslint-disable-next-line no-eval
@@ -175,7 +171,8 @@ test('functions', t => {
     // eslint-disable-next-line no-eval
     eval(`async() => '${val}'`),
     // [AsyncFunction: anonymous]
-    // eslint-disable-next-line func-names, prefer-arrow-callback
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line func-names, no-empty-function, prefer-arrow-callback
     new (Object.getPrototypeOf(async function() { })
       .constructor)(`return '${val}'`),
     // [AsyncFunction: f1]
@@ -191,12 +188,13 @@ test('functions', t => {
     // eslint-disable-next-line no-eval
     eval(`(function*() { yield '${val}' })`),
     // [GeneratorFunction: anonymous]
-    // eslint-disable-next-line func-names
+    // eslint-disable-next-line func-names, no-empty-function
     new (Object.getPrototypeOf(function *() { })
       .constructor)(`yield '${val}'`),
     // [GeneratorFunction: f1]
     // eslint-disable-next-line no-eval
     eval(`f1 = function * () { yield '${val}' }`),
+    //
     // case '[GeneratorFunction: f2]':
     // eslint-disable-next-line no-eval
     eval(`(function *f2() { yield '${val}' })`),
@@ -204,22 +202,23 @@ test('functions', t => {
     // eslint-disable-next-line no-eval
     eval(`(async function*() { yield '${val}' })`),
     // [AsyncGeneratorFunction: anonymous]
-    // eslint-disable-next-line func-names
+    // eslint-disable-next-line func-names, no-empty-function
     new (Object.getPrototypeOf(async function *() { })
       .constructor)(`yield '${val}'`),
+    //
     // case '[AsyncGeneratorFunction: f1]':
     // eslint-disable-next-line no-eval
     eval(`f1 = async function * () { yield '${val}' }`),
     // [AsyncGeneratorFunction: f2]
     // eslint-disable-next-line no-eval
-    eval(`(async function *f2() { yield '${val}' })`)
+    eval(`(async function *f2() { yield '${val}' })`),
 
   ]
 
   un.generate(funcs)
   let g = new Basura({
     arrayLength: 1000,
-    randBytes: un.playback.bind(un)
+    randBytes: un.playback.bind(un),
   })
   t.deepEqual(g.generate().map(f => f.toString()), funcs.map(f => f.toString()))
 
@@ -227,7 +226,7 @@ test('functions', t => {
   g = new Basura({
     output: true,
     arrayLength: 1000,
-    randBytes: un.playback.bind(un)
+    randBytes: un.playback.bind(un),
   })
 
   t.deepEqual(
@@ -249,7 +248,7 @@ test('date', t => {
 })
 
 test('inspect', t => {
-  const b = new Basura({ output: true })
+  const b = new Basura({output: true})
   const m = b.generate_Map()
   t.truthy(util.inspect(m, {depth: null}))
 })
@@ -260,31 +259,31 @@ test('combining', t => {
   un.generate([
     String.fromCodePoint(0x05BA, 0x05E1),
     String.fromCodePoint(0x05BA, 0x05BA, 0x05E1),
-    String.fromCodePoint(0x05BA, 0x05BA)
+    String.fromCodePoint(0x05BA, 0x05BA),
   ])
   const g = new Basura({
-    randBytes: un.playback.bind(un)
+    randBytes: un.playback.bind(un),
   })
   t.deepEqual(g.generate(), [
     String.fromCodePoint(0x05E1),
     String.fromCodePoint(0x05E1),
-    ''
+    '',
   ])
 })
 
 test('invalid regex', t => {
   const un = new Arusab()
-  un.generate(/./) // valid
-  // copy the first half, minus the "pick regexp", deep-ish-ly
+  un.generate(/./) // Valid
+  // Copy the first half, minus the "pick regexp", deep-ish-ly
   un.record = [...un.record, ...un.record.slice(1).map(a => [...a])]
-  // find the first "."
+  // Find the first "."
   const rec = un.record.find(
     ([b, d]) => d.match(/,codepoint,RegExp$/)
   )
-  rec[0] = Buffer.concat([rec[0]]) // copy it, we weren't full deep above
-  rec[0][3] = 0x2b // change the . to a +, giving the bad regex /+/
+  rec[0] = Buffer.concat([rec[0]]) // Copy it, we weren't full deep above
+  rec[0][3] = 0x2b // Change the . to a +, giving the bad regex /+/
   const g = new Basura({
-    randBytes: un.playback.bind(un)
+    randBytes: un.playback.bind(un),
   })
   t.deepEqual(g.generate(), /./)
 })

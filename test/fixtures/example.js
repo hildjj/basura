@@ -1,6 +1,6 @@
-'use strict'
+import {Buffer} from 'buffer'
 
-module.exports = [
+export default [
   undefined,
   NaN,
   true,
@@ -25,7 +25,7 @@ module.exports = [
   'શબ્દ', // Gujarati
   {
     one: 2,
-    three: 4
+    three: 4,
   },
   0n,
   -127n,
@@ -67,5 +67,5 @@ module.exports = [
   new URL('https://example.com/foo#blat'),
   new URL('https://example.com/bug?foo=bar&baz=boo'),
   new URL('https://example.com/bug?foo=bar&baz=boo#blat'),
-  new URL('https://example.com:0/bug?foo=bar&baz=boo#blat')
+  new URL('https://example.com:0/bug?foo=bar&baz=boo#blat'),
 ]

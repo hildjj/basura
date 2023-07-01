@@ -5,3 +5,4 @@
 coverage/
 node_modules/
 TODO
+pnpm-lock.yaml
