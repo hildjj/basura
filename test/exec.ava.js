@@ -18,7 +18,7 @@ async function withTempDir(f) {
   try {
     await f(dir)
   } finally {
-    await fs.rm(dir, {recursive: true})
+    await fs.promises.rm(dir, {recursive: true})
   }
 }
 
