@@ -1,15 +1,15 @@
-'use strict'
+import {Basura} from '../../lib/index.js'
+import {Buffer} from 'buffer'
+import {Scripts} from '../../lib/scripts.js'
+import tlds from 'tlds2'
+import util from 'util'
 
-const Basura = require('../../lib/index')
-const Scripts = require('../../lib/scripts')
 const scripts = Scripts.instance()
-const tlds = require('tlds')
-const util = require('util')
 
 /**
  * Un-generate garbage.  Inverse of Basura, for creating test cases.
  */
-class Arusab extends Basura {
+export class Arusab extends Basura {
   constructor(opts) {
     super(opts)
     this.record = []
@@ -94,13 +94,13 @@ class Arusab extends Basura {
 
   generate_string(txt, depth, reason = 'string') {
     const cp = txt.codePointAt(0)
-    const { script } = scripts.chars.get(cp)
+    const {script} = scripts.chars.get(cp)
     this._pick(this.opts.scripts, script, `script,${reason}`)
     const points = scripts.get(script)
     let len = txt.length
-    const chars = [...txt] // splits on codepoint boundaries
+    const chars = [...txt] // Splits on codepoint boundaries
 
-    // scan the string once, reducing the length by the number of initial
+    // Scan the string once, reducing the length by the number of initial
     // combining characters
     for (const char of chars) {
       const info = points.find(ch => ch.code === char.codePointAt(0))
@@ -135,25 +135,25 @@ class Arusab extends Basura {
 
   generate_URL(url, depth = 0) {
     this._pick([
-      'http:', 'https:', 'ftp:'
+      'http:', 'https:', 'ftp:',
     ], url.protocol, 'URL proto')
-    const m = url.hostname.match(/(.*)\.([^.]+)$/)
-    const [, tu, tld] = m
+    const m = url.hostname.match(/(?<tu>.*)\.(?<tld>[^.]+)$/)
+    const {tu, tld} = m.groups
 
-    this._pick(tlds, tld, 'URL tld')
+    this._pick(tlds.top, tld.toUpperCase(), 'URL tld')
 
-    if (url.port !== '') {
+    if (url.port === '') {
+      this._random01(0.9, 'URL port?')
+    } else {
       this._random01(0.05, 'URL port?')
       this._upto(65536, parseInt(url.port, 10), 'URL port')
-    } else {
-      this._random01(0.9, 'URL port?')
     }
 
-    if (url.pathname !== '/') {
+    if (url.pathname === '/') {
+      this._random01(0.9, 'URL pathname?')
+    } else {
       this._random01(0.05, 'URL pathname?')
       this.generate_string(url.pathname.slice(1), depth + 1, 'URL pathname')
-    } else {
-      this._random01(0.9, 'URL pathname?')
     }
 
     if (url.search) {
@@ -170,7 +170,7 @@ class Arusab extends Basura {
 
     if (url.hash) {
       this._random01(0.05, 'URL hash?')
-      // hash has # in front
+      // Hash has # in front
       this.generate_string(url.hash.slice(1), depth + 1, 'URL hash')
     } else {
       this._random01(0.9, 'URL hash?')
@@ -246,7 +246,7 @@ class Arusab extends Basura {
     }
     let str = n.toString(16)
     if (str.length % 2 !== 0) {
-      str = '0' + str
+      str = `0${str}`
     }
     const buf = Buffer.from(str, 'hex')
     this._upto(
@@ -263,7 +263,7 @@ class Arusab extends Basura {
   }
 
   generate_symbol(s, depth = 0) {
-    const [, name] = s.toString().match(/^Symbol\((.*)\)$/)
+    const {name} = s.toString().match(/^Symbol\((?<name>.*)\)$/).groups
     this.generate_string(name, depth + 1, 'symbol')
   }
 
@@ -298,12 +298,12 @@ class Arusab extends Basura {
       return
     }
     const fstr = f.toString()
-    const m = fstr.match(/'(.*)'/)
-    this.generate_string(m[1], depth, 'function')
+    const m = fstr.match(/'(?<name>.*)'/)
+    this.generate_string(m.groups.name, depth, 'function')
     const fin = util.inspect(f, {
       colors: false,
       depth: Infinity,
-      customInspect: false
+      customInspect: false,
     })
     this._pick(this.functionSpecies, fin, 'function species')
   }
@@ -360,18 +360,17 @@ class Arusab extends Basura {
   }
 }
 
-module.exports = Arusab
-
-if (require.main === module) {
-  const path = require('path')
-  const f = path.resolve(process.cwd(), process.argv[2])
-  const inp = require(f)
-  const u = new Arusab()
-  u.generate(inp)
-  const out = JSON.stringify(
-    u.record.map(([b, r]) => [b.toString('hex'), r]),
-    null,
-    2
-  )
-  console.log(out)
-}
+//
+// if (require.main === module) {
+//   const path = require('path')
+//   const f = path.resolve(process.cwd(), process.argv[2])
+//   const inp = require(f)
+//   const u = new Arusab()
+//   u.generate(inp)
+//   const out = JSON.stringify(
+//     u.record.map(([b, r]) => [b.toString('hex'), r]),
+//     null,
+//     2
+//   )
+//   console.log(out)
+// }

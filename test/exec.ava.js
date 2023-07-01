@@ -1,32 +1,24 @@
-'use strict'
+import {Basura} from '../lib/index.js'
+import {Buffer} from 'buffer'
+import {fileURLToPath} from 'url'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import {spawn} from 'child_process'
+import test from 'ava'
 
-const test = require('ava')
-const {spawn} = require('child_process')
-const path = require('path')
-const util = require('util')
-const fs = require('fs')
-const os = require('os')
-const Basura = require('../')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-const mkdtemp = util.promisify(fs.mkdtemp)
-const readFile = util.promisify(fs.readFile)
-const rmdir = util.promisify(fs.rmdir)
-const pkg = require('../package.json')
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
 
 async function withTempDir(f) {
-  const dir = await mkdtemp(path.join(os.tmpdir(), pkg.name) + '-')
+  const p = `${path.join(os.tmpdir(), pkg.name)}-`
+  const dir = await fs.promises.mkdtemp(p)
   try {
     await f(dir)
   } finally {
-    if (parseFloat(process.version.slice(1)) >= 12.10) {
-      // if you use a more-modern node, I won't leave files in /tmp.
-      // win-win.
-      await rmdir(dir, {recursive: true})
-    } else {
-      console.log(
-        `Clean up "${dir}" manually or upgrade node to 12.10 or higher.`
-      )
-    }
+    await fs.rm(dir, {recursive: true})
   }
 }
 
@@ -35,17 +27,17 @@ function exec(bin, opts = {}) {
     args: [],
     encoding: 'utf8',
     env: {},
-    ...opts
+    ...opts,
   }
   return new Promise((resolve, reject) => {
-    bin = path.join(__dirname, '..', 'bin', bin + '.js')
+    bin = path.join(__dirname, '..', 'bin', `${bin}.js`)
     const env = {
       ...process.env,
-      ...opts.env
+      ...opts.env,
     }
     const c = spawn(bin, opts.args, {
       stdio: 'pipe',
-      env
+      env,
     })
     c.on('error', reject)
     const bufs = []
@@ -54,13 +46,13 @@ function exec(bin, opts = {}) {
     c.on('close', code => {
       const buf = Buffer.concat(bufs)
       const str = buf.toString(opts.encoding)
-      if (code !== 0) {
+      if (code === 0) {
+        resolve(str)
+      } else {
         const err = new Error(`process fail, code ${code}`)
         err.buf = buf
         err.str = str
         reject(err)
-      } else {
-        resolve(str)
       }
     })
     c.on('exit', (code, signal) => {
@@ -80,7 +72,7 @@ function exec(bin, opts = {}) {
 
 test('help', async t => {
   const help = await exec('basura', {
-    args: ['-h']
+    args: ['-h'],
   })
   t.is(help, `\
 Usage: basura [options]
@@ -111,34 +103,34 @@ test('defaults', async t => {
 })
 
 test('version', async t => {
-  t.is(await exec('basura', { args: ['-V']}), pkg.version + '\n')
+  t.is(await exec('basura', {args: ['-V']}), `${pkg.version}\n`)
 })
 
 test('arrayLength', async t => {
-  t.is(await exec('basura', { args: ['-a', '0', '-t', 'Array']}), '[]\n')
+  t.is(await exec('basura', {args: ['-a', '0', '-t', 'Array']}), '[]\n')
   await t.throwsAsync(() => exec('basura', {args: ['-a', 'foo']}))
 })
 
 test('json', async t => {
-  const txt = await exec('basura', { args: ['-j']})
+  const txt = await exec('basura', {args: ['-j']})
   t.notThrows(() => JSON.parse(txt))
 })
 
 test('list types', async t => {
-  const txt = await exec('basura', { args: ['-b', '--listTypes']})
-  const b = new Basura({ noBoxed: true })
-  t.is(txt, b.typeNames.join('\n') + '\n')
+  const txt = await exec('basura', {args: ['-b', '--listTypes']})
+  const b = new Basura({noBoxed: true})
+  t.is(txt, `${b.typeNames.join('\n')}\n`)
 })
 
 test('output', async t => {
-  const txt = await exec('basura', { args: ['-j', '-o-'] })
+  const txt = await exec('basura', {args: ['-j', '-o-']})
   t.notThrows(() => JSON.parse(txt), `Original text: "${txt}"`)
   await withTempDir(async d => {
-    const f = path.resolve(d, 'foo.js')
-    t.is(await exec('basura', { args: ['-o', f] }), '')
+    const f = path.resolve(d, 'foo.mjs')
+    t.is(await exec('basura', {args: ['-o', f]}), '')
     t.notThrows(
-      () => require(f),
-      `module contents: ${await readFile(f, 'utf-8')}`
+      () => import(f),
+      `module contents: ${await fs.promises.readFile(f, 'utf-8')}`
     )
   })
 })

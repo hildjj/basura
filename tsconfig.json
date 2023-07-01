@@ -1,0 +1,14 @@
+{
+  "include": ["lib/*.js"],
+
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "moduleResolution": "node",
+    "module": "ES2020",
+    "outDir": "types",
+    "target": "ES2021",
+  }
+}

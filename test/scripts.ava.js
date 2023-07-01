@@ -1,7 +1,5 @@
-'use strict'
-
-const test = require('ava')
-const Scripts = require('../lib/scripts')
+import {Scripts} from '../lib/scripts.js'
+import test from 'ava'
 
 test('create', t => {
   const s = Scripts.instance()
@@ -15,7 +13,7 @@ test('get', t => {
   const s = Scripts.instance()
   t.throws(() => s.get())
   t.throws(() => s.get(null))
-  t.throws(() => s.get('null')) // prevent regression
+  t.throws(() => s.get('null')) // Prevent regression
 })
 
 test('filter', t => {
