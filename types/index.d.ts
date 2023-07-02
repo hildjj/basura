@@ -117,15 +117,17 @@ export class Basura {
      *   to generate up to stringLength bytes
      * @param {string} [reason='unspecified'] - reason for generation
      * @return {bigint} the random number
+     * @private
      */
-    _randUBigInt(bytes?: number, reason?: string): bigint;
+    private _randUBigInt;
     /**
      * Generate a random number (0,1].
      *
      * @param {string} [reason='unspecified'] - reason for generation
      * @return {number} the random number
+     * @private
      */
-    _random01(reason?: string): number;
+    private _random01;
     /**
      * Generate a random number with close to gaussian distribution.
      * Uses the polar method for normal deviates, which generates two
@@ -138,16 +140,18 @@ export class Basura {
      *   generated
      * @param {string} [reason='unspecified'] - reason for generation
      * @return {number} the random number
+     * @private
      */
-    _randomGauss(mean: number, stdDev: number, reason?: string): number;
+    private _randomGauss;
     /**
      * Generate a random positive integer less than a given number.
      *
      * @param {number} num - one more than the maximum number generated
      * @param {string} [reason='unspecified'] - reason for generation
      * @return {number} the random number
+     * @private
      */
-    _upto(num: number, reason?: string): number;
+    private _upto;
     /**
      * Pick an arbitrary element from the specified array
      *
