@@ -3,7 +3,7 @@
 Generate trash JavaScript.  This is useful for testing libraries and APIs.
 
 The strings that are generated are random, but every string comes from a single
-Unicode script, so they at least look vauguely interesting.
+Unicode script, so they at least look vaguely interesting.
 
 ## Install
 
@@ -39,7 +39,7 @@ Examples:
 Full [API docs](https://hildjj.github.io/basura/) are available.
 
 ```js
-const Basura = require('basura')
+import {Basura} from 'basura'
 
 // The default options.  No need to pass anything in if you like these
 const opts = {
@@ -58,4 +58,6 @@ console.log(b.generate()) // output: ???
 console.log(b.generate_Date()) // output: some date
 ```
 
-[![Tests](https://github.com/hildjj/basura/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/basura/actions/workflows/node.js.yml) [![Coverage Status](https://coveralls.io/repos/github/hildjj/basura/badge.svg?branch=main)](https://coveralls.io/github/hildjj/basura?branch=main)
+---
+[![Tests](https://github.com/hildjj/basura/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/basura/actions/workflows/node.js.yml)
+[![Coverage Status](https://coveralls.io/repos/github/hildjj/basura/badge.svg?branch=main)](https://coveralls.io/github/hildjj/basura?branch=main)
