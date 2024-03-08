@@ -16,3 +16,4 @@ docs/
 tutorials/
 .eslintrc.cjs
 tsconfig.json
+.ncurc
