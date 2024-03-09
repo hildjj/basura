@@ -1,3 +1,4 @@
+import * as ntest from 'node:test';
 import {Arusab} from './fixtures/un.js';
 import {Basura} from '../lib/index.js';
 import {Buffer} from 'buffer';
@@ -244,10 +245,25 @@ test('quote symbols', t => {
 });
 
 test('date', t => {
-  // Punt on re-generating the same date every time.  Let's just try it out.
   const g = new Basura();
-  t.is(g.generate_Date().constructor.name, 'Date');
-  t.is(g.generate_Date().constructor.name, 'Date');
+  t.is(g.generate_Date(0, 0).constructor.name, 'Date');
+  t.is(g.generate_Date(0, 0).constructor.name, 'Date');
+
+  // Node 16 doesn't have mock.
+  if (typeof ntest?.mock?.timers?.enable === 'function') {
+    ntest.mock.timers.enable();
+    // Node 18's date mocks don't work
+    if (Date.now() === 0) {
+      const un = new Arusab();
+      un.generate_Date(0.2885027061804746, 0.4294458559717038);
+      const gu = new Basura({
+        output: true,
+        randBytes: un.playback.bind(un),
+      });
+      t.is(gu.generate_Date().getTime(), -538047509754);
+    }
+    ntest.mock.timers.reset();
+  }
 });
 
 test('inspect', t => {

@@ -35,6 +35,21 @@ export class Arusab extends Basura {
     this._randBytes(buf, `_random01,${reason}`);
   }
 
+  // eslint-disable-next-line max-params
+  _randomGauss(n1, n2, mean, stdDev, reason = 'unspecified') {
+    if (this.spareGauss != null) {
+      const ret = mean + (stdDev * this.spareGauss);
+      this.spareGauss = null;
+      return ret;
+    }
+    const v1 = (2 * this._random01(n1, reason)) - 1;
+    const v2 = (2 * this._random01(n2, reason)) - 1;
+    let s = (v1 * v1) + (v2 * v2);
+    s = Math.sqrt(-2.0 * Math.log(s) / s);
+    this.spareGauss = v2 * s;
+    return mean + (stdDev * v1 * s);
+  }
+
   _upto(num, i, reason = 'unspecified') {
     this._randUInt32(i, `_upto(${num}),${reason}`);
   }
@@ -258,8 +273,8 @@ export class Arusab extends Basura {
     this.generate_boolean(neg, depth, 'bigint sign');
   }
 
-  generate_Date(d, depth = 0, today = null) {
-    this._randomGauss(today.getTime(), 315569520000, 'date');
+  generate_Date(n1, n2, depth = 0) {
+    this._randomGauss(n1, n2, 0, 315569520000, 'date');
   }
 
   generate_symbol(s, depth = 0) {
