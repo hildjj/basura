@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-import {Command, InvalidOptionArgumentError} from 'commander'
-import {Basura} from '../lib/index.js'
-import {fileURLToPath} from 'url'
-import fs from 'fs'
-import path from 'path'
-import util from 'util'
+import {Command, InvalidOptionArgumentError} from 'commander';
+import {Basura} from '../lib/index.js';
+import {fileURLToPath} from 'url';
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
 function myParseInt(value, dummyPrevious) {
-  const v = parseInt(value, 10)
+  const v = parseInt(value, 10);
   if (isNaN(v)) {
-    throw new InvalidOptionArgumentError('Not a number.')
+    throw new InvalidOptionArgumentError('Not a number.');
   }
-  return v
+  return v;
 }
 
-const program = new Command()
+const program = new Command();
 const opts = program
   .version(pkg.version)
   .usage('[options]')
@@ -44,28 +44,28 @@ Examples:
   $ basura -t object
   $ basura -t Array -o array.js`)
   .parse(process.argv)
-  .opts()
+  .opts();
 
 if (opts.json) {
-  opts.jsonSafe = true
+  opts.jsonSafe = true;
 }
 
 function main() {
-  const g = new Basura(opts)
+  const g = new Basura(opts);
 
-  let obj = null
+  let obj = null;
   if (opts.listTypes) {
-    console.log(g.typeNames.join('\n'))
-    return
+    console.log(g.typeNames.join('\n'));
+    return;
   }
 
   if (opts.type) {
-    const t = opts.type
-    delete opts.type
+    const t = opts.type;
+    delete opts.type;
     // eslint-disable-next-line no-useless-call
-    obj = g[`generate_${t}`].call(g)
+    obj = g[`generate_${t}`].call(g);
   } else {
-    obj = g.generate()
+    obj = g.generate();
   }
 
   let str = opts.json ?
@@ -73,19 +73,19 @@ function main() {
     util.inspect(obj, {
       depth: Infinity,
       colors: !opts.output && process.stdout.isTTY,
-    })
-  let out = process.stdout
+    });
+  let out = process.stdout;
   if (opts.output) {
     if (opts.output !== '-') {
-      out = fs.createWriteStream(opts.output)
+      out = fs.createWriteStream(opts.output);
     }
     if (!opts.json) {
-      out.write('export default ')
-      str = Basura.quoteSymbols(str)
+      out.write('export default ');
+      str = Basura.quoteSymbols(str);
     }
   }
-  out.write(str)
-  out.write('\n')
+  out.write(str);
+  out.write('\n');
 }
 
-main()
+main();

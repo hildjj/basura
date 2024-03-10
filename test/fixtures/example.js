@@ -1,4 +1,4 @@
-import {Buffer} from 'buffer'
+import {Buffer} from 'buffer';
 
 export default [
   undefined,
@@ -68,4 +68,4 @@ export default [
   new URL('https://example.com/bug?foo=bar&baz=boo'),
   new URL('https://example.com/bug?foo=bar&baz=boo#blat'),
   new URL('https://example.com:0/bug?foo=bar&baz=boo#blat'),
-]
+];
