@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-/* eslint-disable no-console */
+#!/usr/bin/env -S node
 
 import {Command, InvalidOptionArgumentError} from 'commander';
 import {Basura} from '../lib/index.js';
@@ -13,10 +12,24 @@ const __dirname = path.dirname(__filename);
 
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
-function myParseInt(value, dummyPrevious) {
+function myParseInt(value, _prev) {
   const v = parseInt(value, 10);
   if (isNaN(v)) {
     throw new InvalidOptionArgumentError('Not a number.');
+  }
+  if (v < 0) {
+    throw new InvalidOptionArgumentError('Must not be negative');
+  }
+  return v;
+}
+
+function myParse01(value, _prev) {
+  const v = parseFloat(value);
+  if (isNaN(v)) {
+    throw new InvalidOptionArgumentError('Not a number.');
+  }
+  if (v < 0 || v > 1) {
+    throw new InvalidOptionArgumentError('Must be between 0 and 1 inclusive');
   }
   return v;
 }
@@ -32,6 +45,7 @@ const opts = program
   .option('-b, --noBoxed', 'Do not generate boxed types, like String')
   .option('-c, --cborSafe', 'Do not generate types that break CBOR')
   .option('-d, --depth <number>', 'Maximum depth', myParseInt, 5)
+  .option('-e, --edgeFreq <number>', 'Edge case frequency', myParse01, 0.1)
   .option('-j, --json', 'Output JSON')
   .option('-o, --output <file>', 'File to output')
   .option(
@@ -74,6 +88,7 @@ function main() {
       depth: Infinity,
       colors: !opts.output && process.stdout.isTTY,
     });
+
   let out = process.stdout;
   if (opts.output) {
     if (opts.output !== '-') {
@@ -85,7 +100,7 @@ function main() {
     }
   }
   out.write(str);
-  out.write('\n');
+  out.end('\n');
 }
 
 main();

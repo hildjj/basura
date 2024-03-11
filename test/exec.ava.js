@@ -74,28 +74,7 @@ test('help', async t => {
   const help = await exec('basura', {
     args: ['-h'],
   });
-  t.is(help, `\
-Usage: basura [options]
-
-Generate a random JavaScript object
-
-Options:
-  -V, --version                output the version number
-  -a, --arrayLength <number>   Maximum array/object size (default: 10)
-  -b, --noBoxed                Do not generate boxed types, like String
-  -c, --cborSafe               Do not generate types that break CBOR
-  -d, --depth <number>         Maximum depth (default: 5)
-  -j, --json                   Output JSON
-  -o, --output <file>          File to output
-  -s, --stringLength <number>  Maximum string length (default: 20)
-  -t, --type <type>            Generate this specific type
-  -T, --listTypes              List all supported types, then exit
-  -h, --help                   display help for command
-
-Examples:
-  $ basura -t object
-  $ basura -t Array -o array.js
-`);
+  t.snapshot(help);
 });
 
 test('defaults', async t => {
@@ -122,15 +101,47 @@ test('list types', async t => {
   t.is(txt, `${b.typeNames.join('\n')}\n`);
 });
 
+test('option parsing', async t => {
+  await t.throwsAsync(() => exec('basura', {args: ['-e']}));
+  await t.throwsAsync(() => exec('basura', {args: ['-e', 'aaa']}));
+  await t.throwsAsync(() => exec('basura', {args: ['-e', '2']}));
+  await t.throwsAsync(() => exec('basura', {args: ['-d', '-1']}));
+});
+
 test('output', async t => {
   const txt = await exec('basura', {args: ['-j', '-o-']});
   t.notThrows(() => JSON.parse(txt), `Original text: "${txt}"`);
   await withTempDir(async d => {
     const f = path.resolve(d, 'foo.mjs');
     t.is(await exec('basura', {args: ['-o', f]}), '');
-    t.notThrows(
-      () => import(f),
-      `module contents: ${await fs.promises.readFile(f, 'utf-8')}`
-    );
+    try {
+      await import(f);
+    } catch (er) {
+      t.is(
+        er.cause,
+        'BasuraGenerated',
+        `module contents: ${await fs.promises.readFile(f, 'utf-8')}`
+      );
+    }
+    t.is(await exec('basura', {args: ['-t', 'Promise', '-e', '1', '-o', f]}), '');
+    try {
+      await import(f);
+    } catch (er) {
+      t.is(
+        er.cause,
+        'BasuraGenerated',
+        `module contents: ${await fs.promises.readFile(f, 'utf-8')}`
+      );
+    }
+    t.is(await exec('basura', {args: ['-t', 'Promise', '-e', '0', '-o', f]}), '');
+    try {
+      await import(f);
+    } catch (er) {
+      t.is(
+        er.cause,
+        'BasuraGenerated',
+        `module contents: ${await fs.promises.readFile(f, 'utf-8')}`
+      );
+    }
   });
 });

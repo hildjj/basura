@@ -18,3 +18,4 @@ TODO
 tools/
 tsconfig.json
 tutorials/
+.ncurc

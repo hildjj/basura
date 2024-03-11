@@ -277,6 +277,27 @@ export class Arusab extends Basura {
     this._randomGauss(n1, n2, 0, 315569520000, 'date');
   }
 
+  generate_Error(e, depth = 0) {
+    this._pick(this.ErrorConstructors, e.constructor, 'errorClass');
+    this.generate_string(e.message, depth + 1, 'errorMessage');
+    if (e.constructor === AggregateError) {
+      this._upto(this.opts.arrayLength, e.errors.length, 'AggregateErrorLength');
+      for (const er of e.errors) {
+        this.generate_Error(er, depth + 1);
+      }
+    }
+  }
+
+  async generate_Promise(p, depth = 0) {
+    await p.then(val => {
+      this._random01(0.9, 'promiseReject');
+      this.generate(val, depth + 1);
+    }, er => {
+      this._random01(0.05, 'promiseReject');
+      this.generate_Error(er, depth + 1);
+    });
+  }
+
   generate_symbol(s, depth = 0) {
     const {name} = s.toString().match(/^Symbol\((?<name>.*)\)$/).groups;
     this.generate_string(name, depth + 1, 'symbol');

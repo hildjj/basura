@@ -267,7 +267,7 @@ test('date', t => {
 });
 
 test('inspect', t => {
-  const b = new Basura({output: true});
+  const b = new Basura({output: true, types: {Promise: undefined}});
   const m = b.generate_Map();
   t.truthy(util.inspect(m, {depth: null}));
 });
@@ -306,3 +306,49 @@ test('invalid regex', t => {
   });
   t.deepEqual(g.generate(), /./);
 });
+
+test('Error', t => {
+  let un = new Arusab();
+  const er1 = new Error('foo');
+  const er2 = new SyntaxError('bar');
+  const er3 = new AggregateError([er1, er2], 'baz');
+  un.generate_Error(er1);
+  un.generate_Error(er2);
+  un.generate_Error(er3);
+  let g = new Basura({
+    randBytes: un.playback.bind(un),
+  });
+  t.deepEqual(g.generate_Error(), er1);
+  t.deepEqual(g.generate_Error(), er2);
+  t.deepEqual(g.generate_Error(), er3);
+
+  un = new Arusab();
+  un.generate_Error(er3);
+  g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  t.is(util.inspect(g.generate_Error()), `new AggregateError([
+  new Error('foo', { cause: 'BasuraGenerated' }),
+  new SyntaxError('bar', { cause: 'BasuraGenerated' })
+], 'baz', { cause: 'BasuraGenerated' })`);
+});
+
+test('Promise', async t => {
+  const un = new Arusab();
+  await un.generate_Promise(Promise.resolve(1));
+  await un.generate_Promise(Promise.reject(new RangeError('rover')));
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+  });
+  t.is(await g.generate_Promise(), 1);
+  await t.throwsAsync(() => g.generate_Promise(), {message: 'rover'});
+});
+
+test('unhandled reject ok', t => new Promise((resolve, reject) => {
+  Promise.reject(new Error('Testing unhandled', {cause: 'BasuraGenerated'}));
+  process.nextTick(() => {
+    t.pass();
+    resolve();
+  });
+}));
