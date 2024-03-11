@@ -1,13 +1,20 @@
 import ava from '@cto.af/eslint-config/ava.js';
 import es6 from '@cto.af/eslint-config/es6.js';
-// Import jsdoc from '@cto.af/eslint-config/jsdoc.js';
+import jsdoc from '@cto.af/eslint-config/jsdoc.js';
 
 export default [
   {
     ignores: ['types/**'],
   },
   ...es6,
-  // ...jsdoc,
+  ...jsdoc,
+  {
+    files: ['**/*.js'],
+    rules: {
+      'jsdoc/valid-types': 'off', // Let tsc handle this.
+      'jsdoc/check-types': 'off', // Let tsc handle this.
+    },
+  },
   ...ava,
   {
     files: ['bin/*.js'],
