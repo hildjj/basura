@@ -88,6 +88,7 @@ function main() {
       depth: Infinity,
       colors: !opts.output && process.stdout.isTTY,
       maxArrayLength: Infinity,
+      maxStringLength: Infinity,
     });
 
   let out = process.stdout;

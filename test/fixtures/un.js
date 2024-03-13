@@ -257,7 +257,7 @@ export class Arusab extends Basura {
     this._randBytes(buf, ary.constructor.name);
   }
 
-  generate_object(obj, depth = 0) {
+  generate_Object(obj, depth = 0) {
     const keys = Object.keys(obj);
     const len = keys.length;
     this._upto(this.opts.arrayLength, len, 'objectlen');
@@ -362,7 +362,7 @@ export class Arusab extends Basura {
     if (depth > this.opts.depth) {
       return;
     }
-    this.generate_object(p, depth);
+    this.generate_Object(p, depth);
   }
 
   generate_Set(s, depth = 0) {

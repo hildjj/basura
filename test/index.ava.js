@@ -67,14 +67,14 @@ test('depth', t => {
   t.is(g.generate(Infinity), null);
   t.deepEqual(g.generate_Set(Infinity), new Set());
   t.deepEqual(g.generate_Map(Infinity), new Map());
-  t.is(g.generate_object(Infinity), null);
+  t.is(g.generate_Object(Infinity), null);
   t.is(g.generate_function(Infinity).toString(), '() => {}');
   t.deepEqual(g.generate_Proxy(Infinity), {});
   t.is(g.generate_TypedArray(Infinity).byteLength, 0);
   t.is(typeof g.generate_bigint(), 'bigint');
   t.is(typeof g.generate_symbol(), 'symbol');
   t.true(g.generate_TypedArray().byteLength >= 0);
-  t.is(typeof g.generate_object(), 'object');
+  t.is(typeof g.generate_Object(), 'object');
   t.is(g.generate_Map().constructor.name, 'Map');
   t.is(g.generate_Set().constructor.name, 'Set');
   t.true(util.types.isProxy(g.generate_Proxy()));
@@ -342,6 +342,7 @@ test('Promise', async t => {
   await un.generate_Promise(Promise.reject(new RangeError('rover')));
   const g = new Basura({
     randBytes: un.playback.bind(un),
+    output: true,
   });
   t.is(await g.generate_Promise(), 1);
   await t.throwsAsync(() => g.generate_Promise(), {message: 'rover'});
@@ -384,4 +385,18 @@ test('WeakMap', t => {
   });
   const ws = g.generate_WeakMap();
   t.deepEqual(g.weakMembers.get(ws), entries);
+});
+
+test('Proxy', t => {
+  const un = new Arusab();
+  const o = {
+    a: 1,
+  };
+  un.generate_Proxy(o);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const p = g.generate_Proxy();
+  t.deepEqual(g.weakMembers.get(p), [o]);
 });
