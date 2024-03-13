@@ -85,11 +85,14 @@ export class Basura {
         types: Record<string, BasuraGenerator | null>;
         catchUnhandled: boolean;
     };
+    /** @type {WeakMap<any, any[]>} */
+    weakMembers: WeakMap<any, any[]>;
     spareGauss: number;
     funNumbers: number[];
     functionSpecies: string[];
     typedArrays: (ArrayBufferConstructor | DataViewConstructor | Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor | SharedArrayBufferConstructor | BigInt64ArrayConstructor | BigUint64ArrayConstructor)[];
     ErrorConstructors: (ErrorConstructor | AggregateErrorConstructor)[];
+    validWeak: string[];
     types: Record<string, BasuraGenerator>;
     typeNames: string[];
     /**
@@ -356,6 +359,23 @@ export class Basura {
      */
     generate_Promise(depth?: number): Promise<any>;
     /**
+     * Generate a WeakSet containing 0 or more sub-items of any valid type.
+     *
+     * @param {number} [depth=0] How deep are we in the generated tree of
+     *   objects already?
+     * @returns {WeakSet} Generated.
+     */
+    generate_WeakSet(depth?: number): WeakSet<any>;
+    /**
+     * Generate a WeakMap containing 0 or more key/value pairs where the keys
+     * are valid weak items, and the values can be any valid type.
+     *
+     * @param {number} [depth=0] How deep are we in the generated tree of
+     *   objects already?
+     * @returns {WeakMap} Generated.
+     */
+    generate_WeakMap(depth?: number): WeakMap<any, any>;
+    /**
      * Generate a symbol from a random string.  This will intern the Symbol
      * with Symbol.for to make testing possible.
      *
@@ -376,15 +396,13 @@ export class Basura {
     generate_Map(depth?: number): Map<any, any>;
     /**
      * Generate a Proxy over a random object.  If we are already too deep,
-     * generates a null.  If in output mode, generates a fake Proxy which
-     * can have a custom inspect on it -- that may not be possible for a
-     * real proxy, since util.inspect treats Proxy objects specially.
+     * generates a Proxy around `{}`.
      *
      * @param {number} [depth=0] How deep are we in the generated tree of
      *   objects already?
-     * @returns {Proxy|Object} Plain object in output mode, otherwise Proxy.
+     * @returns {Proxy} Plain object in output mode, otherwise Proxy.
      */
-    generate_Proxy(depth?: number): ProxyConstructor | any;
+    generate_Proxy(depth?: number): ProxyConstructor;
     /**
      * Generate a Set of random things, with length up to arrayLength, and each
      * element being any one of the types this object currently supports.  If
