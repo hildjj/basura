@@ -369,3 +369,19 @@ test('WeakSet', t => {
   const ws = g.generate_WeakSet();
   t.deepEqual(g.weakMembers.get(ws), members);
 });
+
+test('WeakMap', t => {
+  const un = new Arusab();
+  const entries = [
+    [/bar/, 4],
+  ];
+  const m = new WeakMap(entries);
+  un.weakMembers.set(m, entries);
+  un.generate_WeakMap(m);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const ws = g.generate_WeakMap();
+  t.deepEqual(g.weakMembers.get(ws), entries);
+});

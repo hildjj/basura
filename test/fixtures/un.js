@@ -315,13 +315,29 @@ export class Arusab extends Basura {
   }
 
   generate_WeakSet(s, depth = 0) {
-    const members = this.weakMembers.get(s);
-    this._upto(this.opts.arrayLength, members.length, 'weakSetSize');
-    for (const m of members) {
-      const cls = m.constructor.name;
-      this._pick(this.validWeak, cls, 'weakSetClass');
-      const typ = this.types[cls];
-      typ.call(this, m, depth + 1);
+    if (depth <= this.opts.depth) {
+      const members = this.weakMembers.get(s);
+      this._upto(this.opts.arrayLength, members.length, 'weakSetSize');
+      for (const m of members) {
+        const cls = m.constructor.name;
+        this._pick(this.validWeak, cls, 'weakSetClass');
+        const typ = this.types[cls];
+        typ.call(this, m, depth + 1);
+      }
+    }
+  }
+
+  generate_WeakMap(m, depth = 0) {
+    if (depth <= this.opts.depth) {
+      const entries = this.weakMembers.get(m);
+      this._upto(this.opts.arrayLength, entries.length, 'weakMapSize');
+      for (const [k, v] of entries) {
+        const cls = k.constructor.name;
+        this._pick(this.validWeak, cls, 'weakMapKeyClass');
+        const typ = this.types[cls];
+        typ.call(this, k, depth + 1);
+        this.generate(v);
+      }
     }
   }
 
