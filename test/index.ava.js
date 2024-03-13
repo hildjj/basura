@@ -69,7 +69,7 @@ test('depth', t => {
   t.deepEqual(g.generate_Map(Infinity), new Map());
   t.is(g.generate_object(Infinity), null);
   t.is(g.generate_function(Infinity).toString(), '() => {}');
-  t.is(g.generate_Proxy(Infinity), null);
+  t.deepEqual(g.generate_Proxy(Infinity), {});
   t.is(g.generate_TypedArray(Infinity).byteLength, 0);
   t.is(typeof g.generate_bigint(), 'bigint');
   t.is(typeof g.generate_symbol(), 'symbol');
@@ -255,19 +255,21 @@ test('date', t => {
     // Node 18's date mocks don't work
     if (Date.now() === 0) {
       const un = new Arusab();
-      un.generate_Date(0.2885027061804746, 0.4294458559717038);
+      const d1 = un.generate_Date();
+      const d2 = un.generate_Date();
       const gu = new Basura({
         output: true,
         randBytes: un.playback.bind(un),
       });
-      t.is(gu.generate_Date().getTime(), -538047509754);
+      t.deepEqual(gu.generate_Date(), d1);
+      t.deepEqual(gu.generate_Date(), d2);
     }
     ntest.mock.timers.reset();
   }
 });
 
 test('inspect', t => {
-  const b = new Basura({output: true, types: {Promise: undefined}});
+  const b = new Basura({output: true});
   const m = b.generate_Map();
   t.truthy(util.inspect(m, {depth: null}));
 });
@@ -352,3 +354,18 @@ test('unhandled reject ok', t => new Promise((resolve, reject) => {
     resolve();
   });
 }));
+
+test('WeakSet', t => {
+  const un = new Arusab();
+  // eslint-disable-next-line no-new-wrappers
+  const members = [new Number(5), /foo/];
+  const s = new WeakSet(members);
+  un.weakMembers.set(s, members);
+  un.generate_WeakSet(s);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const ws = g.generate_WeakSet();
+  t.deepEqual(g.weakMembers.get(ws), members);
+});

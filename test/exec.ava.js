@@ -117,11 +117,11 @@ test('output', async t => {
     try {
       await import(f);
     } catch (er) {
-      t.is(
-        er.cause,
-        'BasuraGenerated',
-        `module contents: ${await fs.promises.readFile(f, 'utf-8')}`
-      );
+      if (er.cause !== 'BasuraGenerated') {
+        // eslint-disable-next-line no-console
+        console.error(await fs.promises.readFile(f, 'utf-8'));
+        throw er;
+      }
     }
     t.is(await exec('basura', {args: ['-t', 'Promise', '-e', '1', '-o', f]}), '');
     try {

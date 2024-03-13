@@ -87,6 +87,7 @@ function main() {
     util.inspect(obj, {
       depth: Infinity,
       colors: !opts.output && process.stdout.isTTY,
+      maxArrayLength: Infinity,
     });
 
   let out = process.stdout;

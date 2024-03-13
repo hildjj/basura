@@ -13,6 +13,9 @@ export class Arusab extends Basura {
   constructor(opts) {
     super(opts);
     this.record = [];
+
+    /** @type {WeakMap<Date,[v1: number, v2:number]} */
+    this.dateGauss = new WeakMap();
   }
 
   _randBytes(bytes, reason = 'unspecified') {
@@ -35,16 +38,27 @@ export class Arusab extends Basura {
     this._randBytes(buf, `_random01,${reason}`);
   }
 
-  // eslint-disable-next-line max-params
-  _randomGauss(n1, n2, mean, stdDev, reason = 'unspecified') {
+  _randomGauss(mean, stdDev, reason = 'unspecified') {
     if (this.spareGauss != null) {
       const ret = mean + (stdDev * this.spareGauss);
       this.spareGauss = null;
       return ret;
     }
-    const v1 = (2 * this._random01(n1, reason)) - 1;
-    const v2 = (2 * this._random01(n2, reason)) - 1;
-    let s = (v1 * v1) + (v2 * v2);
+    let v1 = 0;
+    let v2 = 0;
+    let r1 = 0;
+    let r2 = 0;
+    let s = 0;
+    const b = new Basura();
+    do {
+      r1 = b._random01(reason);
+      r2 = b._random01(reason);
+      v1 = (2 * r1) - 1;
+      v2 = (2 * r2) - 1;
+      s = (v1 * v1) + (v2 * v2);
+    } while ((s === 0) || (s >= 1));
+    this._random01(r1, reason);
+    this._random01(r2, reason);
     s = Math.sqrt(-2.0 * Math.log(s) / s);
     this.spareGauss = v2 * s;
     return mean + (stdDev * v1 * s);
@@ -273,8 +287,10 @@ export class Arusab extends Basura {
     this.generate_boolean(neg, depth, 'bigint sign');
   }
 
-  generate_Date(n1, n2, depth = 0) {
-    this._randomGauss(n1, n2, 0, 315569520000, 'date');
+  generate_Date(depth = 0) {
+    const n = this._randomGauss(Date.now(), 315569520000, 'date');
+    const d = new Date(n);
+    return d;
   }
 
   generate_Error(e, depth = 0) {
@@ -296,6 +312,17 @@ export class Arusab extends Basura {
       this._random01(0.05, 'promiseReject');
       this.generate_Error(er, depth + 1);
     });
+  }
+
+  generate_WeakSet(s, depth = 0) {
+    const members = this.weakMembers.get(s);
+    this._upto(this.opts.arrayLength, members.length, 'weakSetSize');
+    for (const m of members) {
+      const cls = m.constructor.name;
+      this._pick(this.validWeak, cls, 'weakSetClass');
+      const typ = this.types[cls];
+      typ.call(this, m, depth + 1);
+    }
   }
 
   generate_symbol(s, depth = 0) {
