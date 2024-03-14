@@ -395,6 +395,11 @@ export class Arusab extends Basura {
     this._pick(this.functionSpecies, fin, 'function species');
   }
 
+  generate_Generator(g, depth = 0) {
+    const o = this.weakMembers.get(g);
+    this.generate_Array(o);
+  }
+
   generate(o, depth = 0) {
     let typ = typeof o;
     switch (typ) {

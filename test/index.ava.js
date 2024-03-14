@@ -401,6 +401,23 @@ test('WeakRef', t => {
   t.deepEqual(g.weakMembers.get(wr), [o]);
 });
 
+test('Generator', t => {
+  const un = new Arusab();
+  const o = [/baz/, 12];
+  const gen = (function *gen() {
+    yield *o;
+  }());
+  un.weakMembers.set(gen, o);
+  un.generate_Generator(gen);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const wg = g.generate_Generator();
+  t.deepEqual(g.weakMembers.get(wg), o);
+  t.deepEqual([...wg], o);
+});
+
 test('Proxy', t => {
   const un = new Arusab();
   const o = {

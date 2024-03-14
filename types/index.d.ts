@@ -426,6 +426,14 @@ export class Basura {
      */
     generate_function(depth?: number): Function;
     /**
+     * Generate a generator that yields basura.
+     *
+     * @param {number} [depth=0] How deep are we in the generated tree of
+     *   objects already?
+     * @returns {Generator} Generated.
+     */
+    generate_Generator(depth?: number): Generator;
+    /**
      * Generate a random type that this object currently supports.  Returns
      * null if we're already too deep.
      *
