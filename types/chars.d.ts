@@ -2,11 +2,11 @@
  * Information about a single Unicode codepoint.
  *
  * @typedef {object} CodePoint
- * @property {number} code - codepoint as a number
+ * @property {number} code - Codepoint as a number.
  * @property {"DISALLOWED"|"PVALID"|"CONTEXTO"|"CONTEXTJ"} property - IDNA
- *   2008 derived property
- * @property {string} script - Script name
- * @property {string} category - General category
+ *   2008 derived property.
+ * @property {string} script - Script name.
+ * @property {string} category - General category.
  */
 /**
  * Information about all relevant Unicode codepoints.  Irrelevant codepoints
@@ -21,8 +21,9 @@ export class Chars {
     /**
      * Get information about a single codepoint.
      *
-     * @param {number} code - the codepoint
-     * @return {CodePoint}
+     * @param {number} code The codepoint.
+     * @returns {CodePoint} The data associated with the codepoint.
+     * @throws Trie error.
      */
     get(code: number): CodePoint;
 }
@@ -31,20 +32,20 @@ export class Chars {
  */
 export type CodePoint = {
     /**
-     * - codepoint as a number
+     * - Codepoint as a number.
      */
     code: number;
     /**
      * - IDNA
-     * 2008 derived property
+     * 2008 derived property.
      */
     property: "DISALLOWED" | "PVALID" | "CONTEXTO" | "CONTEXTJ";
     /**
-     * - Script name
+     * - Script name.
      */
     script: string;
     /**
-     * - General category
+     * - General category.
      */
     category: string;
 };

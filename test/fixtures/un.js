@@ -13,6 +13,9 @@ export class Arusab extends Basura {
   constructor(opts) {
     super(opts);
     this.record = [];
+
+    /** @type {WeakMap<Date,[v1: number, v2:number]} */
+    this.dateGauss = new WeakMap();
   }
 
   _randBytes(bytes, reason = 'unspecified') {
@@ -35,16 +38,27 @@ export class Arusab extends Basura {
     this._randBytes(buf, `_random01,${reason}`);
   }
 
-  // eslint-disable-next-line max-params
-  _randomGauss(n1, n2, mean, stdDev, reason = 'unspecified') {
+  _randomGauss(mean, stdDev, reason = 'unspecified') {
     if (this.spareGauss != null) {
       const ret = mean + (stdDev * this.spareGauss);
       this.spareGauss = null;
       return ret;
     }
-    const v1 = (2 * this._random01(n1, reason)) - 1;
-    const v2 = (2 * this._random01(n2, reason)) - 1;
-    let s = (v1 * v1) + (v2 * v2);
+    let v1 = 0;
+    let v2 = 0;
+    let r1 = 0;
+    let r2 = 0;
+    let s = 0;
+    const b = new Basura();
+    do {
+      r1 = b._random01(reason);
+      r2 = b._random01(reason);
+      v1 = (2 * r1) - 1;
+      v2 = (2 * r2) - 1;
+      s = (v1 * v1) + (v2 * v2);
+    } while ((s === 0) || (s >= 1));
+    this._random01(r1, reason);
+    this._random01(r2, reason);
     s = Math.sqrt(-2.0 * Math.log(s) / s);
     this.spareGauss = v2 * s;
     return mean + (stdDev * v1 * s);
@@ -243,7 +257,7 @@ export class Arusab extends Basura {
     this._randBytes(buf, ary.constructor.name);
   }
 
-  generate_object(obj, depth = 0) {
+  generate_Object(obj, depth = 0) {
     const keys = Object.keys(obj);
     const len = keys.length;
     this._upto(this.opts.arrayLength, len, 'objectlen');
@@ -273,8 +287,66 @@ export class Arusab extends Basura {
     this.generate_boolean(neg, depth, 'bigint sign');
   }
 
-  generate_Date(n1, n2, depth = 0) {
-    this._randomGauss(n1, n2, 0, 315569520000, 'date');
+  generate_Date(depth = 0) {
+    const n = this._randomGauss(Date.now(), 315569520000, 'date');
+    const d = new Date(n);
+    return d;
+  }
+
+  generate_Error(e, depth = 0) {
+    this._pick(this.ErrorConstructors, e.constructor, 'errorClass');
+    this.generate_string(e.message, depth + 1, 'errorMessage');
+    if (e.constructor === AggregateError) {
+      this._upto(this.opts.arrayLength, e.errors.length, 'AggregateErrorLength');
+      for (const er of e.errors) {
+        this.generate_Error(er, depth + 1);
+      }
+    }
+  }
+
+  async generate_Promise(p, depth = 0) {
+    await p.then(val => {
+      this._random01(0.9, 'promiseReject');
+      this.generate(val, depth + 1);
+    }, er => {
+      this._random01(0.05, 'promiseReject');
+      this.generate_Error(er, depth + 1);
+    });
+  }
+
+  generate_WeakSet(s, depth = 0) {
+    if (depth <= this.opts.depth) {
+      const members = this.weakMembers.get(s);
+      this._upto(this.opts.arrayLength, members.length, 'weakSetSize');
+      for (const m of members) {
+        const cls = m.constructor.name;
+        this._pick(this.validWeak, cls, 'weakSetClass');
+        const typ = this.types[cls];
+        typ.call(this, m, depth + 1);
+      }
+    }
+  }
+
+  generate_WeakMap(m, depth = 0) {
+    if (depth <= this.opts.depth) {
+      const entries = this.weakMembers.get(m);
+      this._upto(this.opts.arrayLength, entries.length, 'weakMapSize');
+      for (const [k, v] of entries) {
+        const cls = k.constructor.name;
+        this._pick(this.validWeak, cls, 'weakMapKeyClass');
+        const typ = this.types[cls];
+        typ.call(this, k, depth + 1);
+        this.generate(v);
+      }
+    }
+  }
+
+  generate_WeakRef(w, depth = 0) {
+    const [o] = this.weakMembers.get(w);
+    const cls = o.constructor.name;
+    this._pick(this.validWeak, cls, 'weakRef');
+    const typ = this.types[cls];
+    typ.call(this, o, depth + 1);
   }
 
   generate_symbol(s, depth = 0) {
@@ -298,7 +370,7 @@ export class Arusab extends Basura {
     if (depth > this.opts.depth) {
       return;
     }
-    this.generate_object(p, depth);
+    this.generate_Object(p, depth);
   }
 
   generate_Set(s, depth = 0) {
@@ -321,6 +393,11 @@ export class Arusab extends Basura {
       customInspect: false,
     });
     this._pick(this.functionSpecies, fin, 'function species');
+  }
+
+  generate_Generator(g, depth = 0) {
+    const o = this.weakMembers.get(g);
+    this.generate_Array(o);
   }
 
   generate(o, depth = 0) {

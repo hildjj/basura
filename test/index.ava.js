@@ -67,14 +67,14 @@ test('depth', t => {
   t.is(g.generate(Infinity), null);
   t.deepEqual(g.generate_Set(Infinity), new Set());
   t.deepEqual(g.generate_Map(Infinity), new Map());
-  t.is(g.generate_object(Infinity), null);
+  t.is(g.generate_Object(Infinity), null);
   t.is(g.generate_function(Infinity).toString(), '() => {}');
-  t.is(g.generate_Proxy(Infinity), null);
+  t.deepEqual(g.generate_Proxy(Infinity), {});
   t.is(g.generate_TypedArray(Infinity).byteLength, 0);
   t.is(typeof g.generate_bigint(), 'bigint');
   t.is(typeof g.generate_symbol(), 'symbol');
   t.true(g.generate_TypedArray().byteLength >= 0);
-  t.is(typeof g.generate_object(), 'object');
+  t.is(typeof g.generate_Object(), 'object');
   t.is(g.generate_Map().constructor.name, 'Map');
   t.is(g.generate_Set().constructor.name, 'Set');
   t.true(util.types.isProxy(g.generate_Proxy()));
@@ -255,12 +255,14 @@ test('date', t => {
     // Node 18's date mocks don't work
     if (Date.now() === 0) {
       const un = new Arusab();
-      un.generate_Date(0.2885027061804746, 0.4294458559717038);
+      const d1 = un.generate_Date();
+      const d2 = un.generate_Date();
       const gu = new Basura({
         output: true,
         randBytes: un.playback.bind(un),
       });
-      t.is(gu.generate_Date().getTime(), -538047509754);
+      t.deepEqual(gu.generate_Date(), d1);
+      t.deepEqual(gu.generate_Date(), d2);
     }
     ntest.mock.timers.reset();
   }
@@ -305,4 +307,127 @@ test('invalid regex', t => {
     randBytes: un.playback.bind(un),
   });
   t.deepEqual(g.generate(), /./);
+});
+
+test('Error', t => {
+  let un = new Arusab();
+  const er1 = new Error('foo');
+  const er2 = new SyntaxError('bar');
+  const er3 = new AggregateError([er1, er2], 'baz');
+  un.generate_Error(er1);
+  un.generate_Error(er2);
+  un.generate_Error(er3);
+  let g = new Basura({
+    randBytes: un.playback.bind(un),
+  });
+  t.deepEqual(g.generate_Error(), er1);
+  t.deepEqual(g.generate_Error(), er2);
+  t.deepEqual(g.generate_Error(), er3);
+
+  un = new Arusab();
+  un.generate_Error(er3);
+  g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  t.is(util.inspect(g.generate_Error()), `new AggregateError([
+  new Error('foo', { cause: 'BasuraGenerated' }),
+  new SyntaxError('bar', { cause: 'BasuraGenerated' })
+], 'baz', { cause: 'BasuraGenerated' })`);
+});
+
+test('Promise', async t => {
+  const un = new Arusab();
+  await un.generate_Promise(Promise.resolve(1));
+  await un.generate_Promise(Promise.reject(new RangeError('rover')));
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  t.is(await g.generate_Promise(), 1);
+  await t.throwsAsync(() => g.generate_Promise(), {message: 'rover'});
+});
+
+test('unhandled reject ok', t => new Promise((resolve, reject) => {
+  Promise.reject(new Error('Testing unhandled', {cause: 'BasuraGenerated'}));
+  process.nextTick(() => {
+    t.pass();
+    resolve();
+  });
+}));
+
+test('WeakSet', t => {
+  const un = new Arusab();
+  // eslint-disable-next-line no-new-wrappers
+  const members = [new Number(5), /foo/];
+  const s = new WeakSet(members);
+  un.weakMembers.set(s, members);
+  un.generate_WeakSet(s);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const ws = g.generate_WeakSet();
+  t.deepEqual(g.weakMembers.get(ws), members);
+});
+
+test('WeakMap', t => {
+  const un = new Arusab();
+  const entries = [
+    [/bar/, 4],
+  ];
+  const m = new WeakMap(entries);
+  un.weakMembers.set(m, entries);
+  un.generate_WeakMap(m);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const ws = g.generate_WeakMap();
+  t.deepEqual(g.weakMembers.get(ws), entries);
+});
+
+test('WeakRef', t => {
+  const un = new Arusab();
+  const o = /baz/;
+  const r = new WeakRef(o);
+  un.weakMembers.set(r, [o]);
+  un.generate_WeakRef(r);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const wr = g.generate_WeakRef();
+  t.deepEqual(g.weakMembers.get(wr), [o]);
+});
+
+test('Generator', t => {
+  const un = new Arusab();
+  const o = [/baz/, 12];
+  const gen = (function *gen() {
+    yield *o;
+  }());
+  un.weakMembers.set(gen, o);
+  un.generate_Generator(gen);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const wg = g.generate_Generator();
+  t.deepEqual(g.weakMembers.get(wg), o);
+  t.deepEqual([...wg], o);
+});
+
+test('Proxy', t => {
+  const un = new Arusab();
+  const o = {
+    a: 1,
+  };
+  un.generate_Proxy(o);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const p = g.generate_Proxy();
+  t.deepEqual(g.weakMembers.get(p), [o]);
 });
