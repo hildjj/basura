@@ -175,6 +175,7 @@ export class Basura {
      * @private
      */
     private _some;
+    _randWeak(depth?: number, reason?: string): any;
     /**
      * Generate undefined.
      *
@@ -323,7 +324,7 @@ export class Basura {
      *   objects already?
      * @returns {?Object} Object or null.
      */
-    generate_object(depth?: number): any | null;
+    generate_Object(depth?: number): any | null;
     /**
      * Generate a random BigInt of up to stringLength bytes.
      *
@@ -375,6 +376,7 @@ export class Basura {
      * @returns {WeakMap} Generated.
      */
     generate_WeakMap(depth?: number): WeakMap<any, any>;
+    generate_WeakRef(depth?: number): WeakRef<any>;
     /**
      * Generate a symbol from a random string.  This will intern the Symbol
      * with Symbol.for to make testing possible.

@@ -387,6 +387,20 @@ test('WeakMap', t => {
   t.deepEqual(g.weakMembers.get(ws), entries);
 });
 
+test('WeakRef', t => {
+  const un = new Arusab();
+  const o = /baz/;
+  const r = new WeakRef(o);
+  un.weakMembers.set(r, [o]);
+  un.generate_WeakRef(r);
+  const g = new Basura({
+    randBytes: un.playback.bind(un),
+    output: true,
+  });
+  const wr = g.generate_WeakRef();
+  t.deepEqual(g.weakMembers.get(wr), [o]);
+});
+
 test('Proxy', t => {
   const un = new Arusab();
   const o = {

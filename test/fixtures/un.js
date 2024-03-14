@@ -341,6 +341,14 @@ export class Arusab extends Basura {
     }
   }
 
+  generate_WeakRef(w, depth = 0) {
+    const [o] = this.weakMembers.get(w);
+    const cls = o.constructor.name;
+    this._pick(this.validWeak, cls, 'weakRef');
+    const typ = this.types[cls];
+    typ.call(this, o, depth + 1);
+  }
+
   generate_symbol(s, depth = 0) {
     const {name} = s.toString().match(/^Symbol\((?<name>.*)\)$/).groups;
     this.generate_string(name, depth + 1, 'symbol');
