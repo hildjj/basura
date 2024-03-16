@@ -4,7 +4,10 @@ import jsdoc from '@cto.af/eslint-config/jsdoc.js';
 
 export default [
   {
-    ignores: ['types/**'],
+    ignores: [
+      'types/**',
+      'examples/**',
+    ],
   },
   ...es6,
   ...jsdoc,

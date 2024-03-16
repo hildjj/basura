@@ -3,11 +3,8 @@
  * Function to generate basura of a certain type.  Called with `this` the
  * current Basura instance.
  *
+ * @typedef {(this: Basura, depth?: number) => T|null} BasuraGen
  * @template [T=unknown]
- * @callback BasuraGen
- * @param {number} [depth=0] How deep are we in the generated tree of objects
- *   already?
- * @returns {T|null} The generated basura.  Return null if too deep.
  */
 /**
  * @typedef {object} GenMeta
@@ -371,7 +368,7 @@ export class Basura {
  * Function to generate basura of a certain type.  Called with `this` the
  * current Basura instance.
  */
-export type BasuraGen<T = unknown> = (depth?: number) => T | null;
+export type BasuraGen<T = unknown> = (this: Basura, depth?: number) => T | null;
 export type GenMeta = {
     /**
      * Relative frequency for this generator.

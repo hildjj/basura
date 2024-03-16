@@ -19,15 +19,19 @@ Generate a random JavaScript object
 Options:
   -V, --version                output the version number
   -a, --arrayLength <number>   Maximum array/object size (default: 10)
-  -b, --noBoxed                Do not generate boxed types, like String
-  -c, --cborSafe               Do not generate types that break CBOR
-  -d, --depth <number>         Maximum depth (default: 5)
-  -e, --edgeFreq <number>      Edge case frequency (default: 0.1)
-  -j, --json                   Output JSON
-  -o, --output <file>          File to output
-  -s, --stringLength <number>  Maximum string length (default: 20)
-  -t, --type <type>            Generate this specific type
-  -T, --listTypes              List all supported types, then exit
+  -b, --noBoxed                Do not generate boxed types, like String.
+  -c, --cborSafe               Do not generate types that break CBOR.
+  -d, --depth <number>         Maximum depth. (default: 5)
+  -e, --edgeFreq <number>      Edge case frequency. (default: 0.1)
+  -i, --import <file>          Import the given file, and use its default
+                               export as an additional type generator.  Can be
+                               specified multiple times. (default: [])
+  -j, --json                   Output JSON, not generating any types that will
+                               not fit.
+  -o, --output <file>          File to output.
+  -s, --stringLength <number>  Maximum string length. (default: 20)
+  -t, --type <type>            Generate this specific type.
+  -T, --listTypes              List all supported types, then exit.
   -h, --help                   display help for command
 
 Examples:
@@ -85,6 +89,11 @@ Examples:
 - symbol
 - undefined
 
+## Adding new types
+
+Pass new types in the `types` option, or from the command line, use `--import
+<moduleFile>`. See an [example](test/fixtures/custom.js).
+
 ## API
 
 Full [API docs](https://hildjj.github.io/basura/) are available.
@@ -109,6 +118,8 @@ const b = new Basura(opts)
 console.log(b.generate_Date()) // Example output: 2011-02-16T11:28:41.539Z
 console.log(b.generate()) // Some possibly-large chunk of JS
 ```
+
+See some example output in the [examples](examples) directory.
 
 ---
 [![Tests](https://github.com/hildjj/basura/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/basura/actions/workflows/node.js.yml)

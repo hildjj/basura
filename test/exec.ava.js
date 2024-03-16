@@ -9,8 +9,9 @@ import test from 'ava';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const root = path.resolve(__dirname, '..');
 
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
 async function withTempDir(f) {
   const p = `${path.join(os.tmpdir(), pkg.name)}-`;
@@ -30,12 +31,13 @@ function exec(bin, opts = {}) {
     ...opts,
   };
   return new Promise((resolve, reject) => {
-    bin = path.join(__dirname, '..', 'bin', `${bin}.js`);
+    bin = path.join(root, 'bin', `${bin}.js`);
     const env = {
       ...process.env,
       ...opts.env,
     };
     const c = spawn(bin, opts.args, {
+      cwd: root,
       stdio: 'pipe',
       env,
     });
@@ -144,4 +146,14 @@ test('output', async t => {
       );
     }
   });
+});
+
+test('imports', async t => {
+  t.regex(await exec('basura', {
+    args: ['-i', './test/fixtures/custom.js', '-t', 'Foo'],
+  }), /Foo/);
+
+  t.is(await exec('basura', {
+    args: ['-i', './test/fixtures/custom_min.js', '-t', 'min'],
+  }), '4\n');
 });
