@@ -1,112 +1,63 @@
 import {Basura} from '../../lib/index.js';
 import {Buffer} from 'buffer';
+import {Modnar} from './modnar.js';
 import {Scripts} from '../../lib/scripts.js';
+import assert from 'node:assert';
 import tlds from 'tlds2';
 import util from 'util';
 
 const scripts = Scripts.instance();
+const ONEISH = 1 - Number.EPSILON;
 
 /**
  * Un-generate garbage.  Inverse of Basura, for creating test cases.
  */
 export class Arusab extends Basura {
+  rand = new Modnar();
+
   constructor(opts) {
     super(opts);
-    this.record = [];
-
-    /** @type {WeakMap<Date,[v1: number, v2:number]} */
-    this.dateGauss = new WeakMap();
   }
 
-  _randBytes(bytes, reason = 'unspecified') {
-    this.record.push([bytes, reason]);
+  get source() {
+    return this.rand.source;
   }
 
-  _randUInt32(i, reason = 'unspecified') {
-    const b = Buffer.alloc(4);
-    b.writeUInt32BE(i);
-    this._randBytes(b, `_randUInt32,${reason}`);
+  get isDone() {
+    return this.rand.isDone;
   }
 
-  _random01(n, reason = 'unspecified') {
-    const buf = Buffer.alloc(8);
-    new DataView(
-      buf.buffer,
-      buf.byteOffset,
-      buf.byteLength
-    ).setFloat64(0, 1 + n, true);
-    this._randBytes(buf, `_random01,${reason}`);
-  }
-
-  _randomGauss(mean, stdDev, reason = 'unspecified') {
-    if (this.spareGauss != null) {
-      const ret = mean + (stdDev * this.spareGauss);
-      this.spareGauss = null;
-      return ret;
-    }
-    let v1 = 0;
-    let v2 = 0;
-    let r1 = 0;
-    let r2 = 0;
-    let s = 0;
-    const b = new Basura();
-    do {
-      r1 = b._random01(reason);
-      r2 = b._random01(reason);
-      v1 = (2 * r1) - 1;
-      v2 = (2 * r2) - 1;
-      s = (v1 * v1) + (v2 * v2);
-    } while ((s === 0) || (s >= 1));
-    this._random01(r1, reason);
-    this._random01(r2, reason);
-    s = Math.sqrt(-2.0 * Math.log(s) / s);
-    this.spareGauss = v2 * s;
-    return mean + (stdDev * v1 * s);
-  }
-
-  _upto(num, i, reason = 'unspecified') {
-    this._randUInt32(i, `_upto(${num}),${reason}`);
-  }
-
-  _pick(ary, m, reason = 'unspecified') {
-    const i = ary.indexOf(m);
-    if (i === -1) {
-      throw new Error(`not found: ${m} in ${ary}`, {ary, m, reason});
-    }
-    this._upto(ary.length, i, `_pick(${ary.length}),${reason}`);
-  }
-
-  _some(ary, sa, reason = 'unspecified') {
-    [...ary].forEach(c => this._upto(2, sa.includes(c), reason));
+  drop(reason) {
+    return this.rand.drop(reason);
   }
 
   generate_boolean(b, depth = 0, reason = 'boolean') {
-    this._upto(2, b, reason);
+    this.rand.bool(b, reason);
   }
 
   generate_Boolean(b, depth = 0) {
-    this._upto(2, b, 'Boolean');
+    this.rand.bool(b, 'Boolean');
   }
 
   generate_integer(i) {
-    this._randUInt32(i + 0x7FFFFFFF, 'integer');
+    this.rand.uInt32(i + 0x7FFFFFFF, 'integer');
   }
 
   generate_number(n) {
     const i = this.funNumbers.findIndex(o => Object.is(o, n));
     if (i !== -1) {
-      this._random01(0.05, 'number');
-      this._upto(
-        this.funNumbers.length,
+      this.rand.random(this.opts.edgeFreq / 2, 'number');
+      this.rand.upto(
         i,
-        `_pick(${this.funNumbers.length}),fun number`
+        this.funNumbers.length,
+        `pick(${this.funNumbers.length}),fun number`
       );
       return;
     }
-    this._random01(0.9, 'number');
+    this.rand.random(ONEISH, 'number');
     const b = Buffer.alloc(8);
     b.writeDoubleBE(n);
-    this._randBytes(b, 'number');
+    this.rand.bytes(b, 'number');
   }
 
   generate_Number(n, depth = 0) {
@@ -117,14 +68,14 @@ export class Arusab extends Basura {
     if (depth > this.opts.depth) {
       return;
     }
-    this._upto(this.opts.stringLength, b.length, 'Buffer length');
-    this._randBytes(Buffer.concat([b]), 'Buffer');
+    this.rand.upto(b.length, this.opts.stringLength, 'Buffer length');
+    this.rand.bytes(Buffer.concat([b]), 'Buffer');
   }
 
   generate_string(txt, depth, reason = 'string') {
     const cp = txt.codePointAt(0);
     const {script} = scripts.chars.get(cp);
-    this._pick(this.opts.scripts, script, `script,${reason}`);
+    this.rand.pick(script, this.opts.scripts, `script,${reason}`);
     const points = scripts.get(script);
     let len = txt.length;
     const chars = [...txt]; // Splits on codepoint boundaries
@@ -140,12 +91,12 @@ export class Arusab extends Basura {
       }
     }
 
-    this._upto(this.opts.stringLength, len, `stringLength,${reason}`);
+    this.rand.upto(len, this.opts.stringLength, `stringLength,${reason}`);
     const codes = points.map(c => c.code);
     for (const char of chars) {
-      this._pick(
-        codes,
+      this.rand.pick(
         char.codePointAt(0),
+        codes,
         `codepoint,${reason}`
       );
     }
@@ -158,51 +109,51 @@ export class Arusab extends Basura {
   generate_RegExp(re, depth) {
     this.generate_string(re.source, depth, 'RegExp');
     if (!this.opts.cborSafe) {
-      this._some('gimsuy', re.flags, 'RegExp flags');
+      this.rand.some(re.flags, 'gimsuy', 'RegExp flags');
     }
   }
 
   generate_URL(url, depth = 0) {
-    this._pick([
+    this.rand.pick(url.protocol, [
       'http:', 'https:', 'ftp:',
-    ], url.protocol, 'URL proto');
+    ], 'URL proto');
     const m = url.hostname.match(/(?<tu>.*)\.(?<tld>[^.]+)$/);
     const {tu, tld} = m.groups;
 
-    this._pick(tlds.top, tld.toUpperCase(), 'URL tld');
+    this.rand.pick(tld.toUpperCase(), tlds.top, 'URL tld');
 
     if (url.port === '') {
-      this._random01(0.9, 'URL port?');
+      this.rand.random(0.9, 'URL port?');
     } else {
-      this._random01(0.05, 'URL port?');
-      this._upto(65536, parseInt(url.port, 10), 'URL port');
+      this.rand.random(0.05, 'URL port?');
+      this.rand.upto(parseInt(url.port, 10), 65536, 'URL port');
     }
 
     if (url.pathname === '/') {
-      this._random01(0.9, 'URL pathname?');
+      this.rand.random(0.9, 'URL pathname?');
     } else {
-      this._random01(0.05, 'URL pathname?');
+      this.rand.random(0.05, 'URL pathname?');
       this.generate_string(url.pathname.slice(1), depth + 1, 'URL pathname');
     }
 
     if (url.search) {
-      this._random01(0.05, 'URL search?');
+      this.rand.random(0.05, 'URL search?');
       const params = [...url.searchParams];
-      this._upto(3, params.length, 'num search params');
+      this.rand.upto(params.length, 3, 'num search params');
       for (const [k, v] of params) {
         this.generate_string(k, depth + 1, 'URL search name');
         this.generate_string(v, depth + 1, 'URL search value');
       }
     } else {
-      this._random01(0.9, 'URL search?');
+      this.rand.random(0.9, 'URL search?');
     }
 
     if (url.hash) {
-      this._random01(0.05, 'URL hash?');
+      this.rand.random(0.05, 'URL hash?');
       // Hash has # in front
       this.generate_string(url.hash.slice(1), depth + 1, 'URL hash');
     } else {
-      this._random01(0.9, 'URL hash?');
+      this.rand.random(0.9, 'URL hash?');
     }
 
     let script = 'Latin';
@@ -219,48 +170,48 @@ export class Arusab extends Basura {
       c => ['Ll', 'Lo', 'Lm'].includes(c.category)
     ).map(c => c.code);
 
-    this._pick(lowercase, str.shift(), 'copdepoint1,URL');
+    this.rand.pick(str.shift(), lowercase, 'copdepoint1,URL');
 
     const more = points.filter(
       c => ['Ll', 'Lm', 'Lo', 'Nd', 'Mn', 'Mc'].includes(c.category)
     ).map(c => c.code);
 
-    this._upto(this.opts.stringLength - 1, str.length, 'stringLength,URL');
+    this.rand.upto(str.length, this.opts.stringLength - 1, 'stringLength,URL');
     for (const p of str) {
-      this._pick(more, p, 'codepoint,URL');
+      this.rand.pick(p, more, 'codepoint,URL');
     }
   }
 
   generate_Array(a, depth = 0) {
     const len = a.length;
-    this._upto(this.opts.arrayLength, len, 'arrayLength');
+    this.rand.upto(len, this.opts.arrayLength, 'arrayLength');
     for (const i of a) {
       this.generate(i, depth + 1);
     }
   }
 
   generate_TypedArray(ary, depth = 0) {
-    this._pick(
-      this.typedArrays,
+    this.rand.pick(
       ary.constructor,
+      this.typedArrays,
       'TypedArray type'
     );
     const sz = ary.BYTES_PER_ELEMENT || 1;
     if (depth <= this.opts.depth) {
-      this._upto(
-        this.opts.arrayLength,
+      this.rand.upto(
         ary.byteLength / sz,
+        this.opts.arrayLength,
         `${ary.constructor.name} len`
       );
     }
     const buf = Buffer.from(ary.buffer || ary, ary.byteOffset, ary.byteLength);
-    this._randBytes(buf, ary.constructor.name);
+    this.rand.bytes(buf, ary.constructor.name);
   }
 
   generate_Object(obj, depth = 0) {
     const keys = Object.keys(obj);
     const len = keys.length;
-    this._upto(this.opts.arrayLength, len, 'objectlen');
+    this.rand.upto(len, this.opts.arrayLength, 'objectlen');
     for (let i = 0; i < len; i++) {
       this.generate_string(keys[i], depth + 1, 'key');
       this.generate(obj[keys[i]], depth + 1);
@@ -278,26 +229,25 @@ export class Arusab extends Basura {
       str = `0${str}`;
     }
     const buf = Buffer.from(str, 'hex');
-    this._upto(
-      this.opts.stringLength - 1,
+    this.rand.upto(
       buf.length - 1,
-      '_randUBigInt len,signed'
+      this.opts.stringLength - 1,
+      'uBigInt len'
     );
-    this._randBytes(buf, '_randUBigInt,signed');
-    this.generate_boolean(neg, depth, 'bigint sign');
+    this.rand.bytes(buf, 'uBigInt,uBigInt unsigned');
+    this.generate_boolean(neg, depth, 'uBigInt sign');
   }
 
   generate_Date(depth = 0) {
-    const n = this._randomGauss(Date.now(), 315569520000, 'date');
-    const d = new Date(n);
-    return d;
+    const n = this.rand.gauss(Date.now(), 315569520000, 'date');
+    return new Date(n);
   }
 
   generate_Error(e, depth = 0) {
-    this._pick(this.ErrorConstructors, e.constructor, 'errorClass');
+    this.rand.pick(e.constructor, this.ErrorConstructors, 'errorClass');
     this.generate_string(e.message, depth + 1, 'errorMessage');
     if (e.constructor === AggregateError) {
-      this._upto(this.opts.arrayLength, e.errors.length, 'AggregateErrorLength');
+      this.rand.upto(e.errors.length, this.opts.arrayLength, 'AggregateErrorLength');
       for (const er of e.errors) {
         this.generate_Error(er, depth + 1);
       }
@@ -306,10 +256,10 @@ export class Arusab extends Basura {
 
   async generate_Promise(p, depth = 0) {
     await p.then(val => {
-      this._random01(0.9, 'promiseReject');
+      this.rand.random(0.9, 'promiseReject');
       this.generate(val, depth + 1);
     }, er => {
-      this._random01(0.05, 'promiseReject');
+      this.rand.random(0.05, 'promiseReject');
       this.generate_Error(er, depth + 1);
     });
   }
@@ -317,11 +267,14 @@ export class Arusab extends Basura {
   generate_WeakSet(s, depth = 0) {
     if (depth <= this.opts.depth) {
       const members = this.weakMembers.get(s);
-      this._upto(this.opts.arrayLength, members.length, 'weakSetSize');
+      assert(members);
+      this.rand.upto(members.length, this.opts.arrayLength, 'weakSetSize');
       for (const m of members) {
         const cls = m.constructor.name;
-        this._pick(this.validWeak, cls, 'weakSetClass');
+        assert(cls);
+        this.rand.pick(cls, this.validWeak, 'weakSetClass');
         const typ = this.types[cls];
+        assert(typ);
         typ.call(this, m, depth + 1);
       }
     }
@@ -330,10 +283,10 @@ export class Arusab extends Basura {
   generate_WeakMap(m, depth = 0) {
     if (depth <= this.opts.depth) {
       const entries = this.weakMembers.get(m);
-      this._upto(this.opts.arrayLength, entries.length, 'weakMapSize');
+      this.rand.upto(entries.length, this.opts.arrayLength, 'weakMapSize');
       for (const [k, v] of entries) {
         const cls = k.constructor.name;
-        this._pick(this.validWeak, cls, 'weakMapKeyClass');
+        this.rand.pick(cls, this.validWeak, 'weakMapKeyClass');
         const typ = this.types[cls];
         typ.call(this, k, depth + 1);
         this.generate(v);
@@ -344,7 +297,7 @@ export class Arusab extends Basura {
   generate_WeakRef(w, depth = 0) {
     const [o] = this.weakMembers.get(w);
     const cls = o.constructor.name;
-    this._pick(this.validWeak, cls, 'weakRef');
+    this.rand.pick(cls, this.validWeak, 'weakRef');
     const typ = this.types[cls];
     typ.call(this, o, depth + 1);
   }
@@ -359,7 +312,7 @@ export class Arusab extends Basura {
       m = 0;
     }
 
-    this._upto(this.opts.arrayLength, m.size, 'Map len');
+    this.rand.upto(m.size, this.opts.arrayLength, 'Map len');
     for (const [k, v] of m.entries()) {
       this.generate(k, depth + 1);
       this.generate(v, depth + 1);
@@ -374,7 +327,7 @@ export class Arusab extends Basura {
   }
 
   generate_Set(s, depth = 0) {
-    this._upto(this.opts.arrayLength, s.size, 'setlen');
+    this.rand.upto(s.size, this.opts.arrayLength, 'setlen');
     for (const o of s) {
       this.generate(o, depth + 1);
     }
@@ -392,7 +345,7 @@ export class Arusab extends Basura {
       depth: Infinity,
       customInspect: false,
     });
-    this._pick(this.functionSpecies, fin, 'function species');
+    this.rand.pick(fin, this.functionSpecies, 'function species');
   }
 
   generate_Generator(g, depth = 0) {
@@ -430,39 +383,11 @@ export class Arusab extends Basura {
       default:
         throw new Error(`Unknown type: "${typeof o}"`);
     }
-    this._pick(this.typeNames, typ, 'type');
+    this.rand.pick(typ, this.typeNames, 'type');
     const f = this.types[typ];
     if (!f) {
       throw new Error(`invalid type: "${typ}"`);
     }
     f.call(this, o, depth + 1);
   }
-
-  playback(num, reason = 'unspecified') {
-    if (!this.record.length) {
-      throw new Error(`Out of playback data (${num}): "${reason}"`);
-    }
-    const [buf, origReason] = this.record.shift();
-    if ((buf.length !== num) || (reason !== origReason)) {
-      throw new Error(
-        `Expected ${num} bytes, got ${buf.length}.  "${reason}" "${origReason}"`
-      );
-    }
-    return buf;
-  }
 }
-
-//
-// if (require.main === module) {
-//   const path = require('path')
-//   const f = path.resolve(process.cwd(), process.argv[2])
-//   const inp = require(f)
-//   const u = new Arusab()
-//   u.generate(inp)
-//   const out = JSON.stringify(
-//     u.record.map(([b, r]) => [b.toString('hex'), r]),
-//     null,
-//     2
-//   )
-//   console.log(out)
-// }
