@@ -11,7 +11,7 @@
     "clean": "rimraf coverage .nyc_output/ docs data/*.json",
     "lint": "eslint .",
     "data": "node tools/create.js",
-    "docs": "typedoc lib/index.js",
+    "docs": "typedoc lib/index.js lib/random.js lib/vose.js lib/decorators.js",
     "coverage": "c8 npm test",
     "test": "ava",
     "predev": "npm run coverage",

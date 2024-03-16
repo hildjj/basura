@@ -12,8 +12,10 @@
 /**
  * @typedef {object} GenMeta
  * @property {number} [freq] Relative frequency for this generator.
+ * @property {boolean} [boxed] Generates a boxed type.
  * @property {boolean} [cborUnsafe] Generator unsafe for CBOR.
  * @property {boolean} [jsonUnsafe] Generator unsafe for JSON.
+ * @property {boolean} [weak] Generates a type that can be weakly held.
  */
 /**
  * @typedef {BasuraGen<T> & GenMeta} BasuraGenerator
@@ -36,6 +38,8 @@ export class Basura {
      * @returns {string} The modified string.
      */
     static quoteSymbols(str: string): string;
+    /** @type {[string, ...import("./decorators.js").MethodDecorator[]][]} */
+    static annotations: [string, ...import("./decorators.js").MethodDecorator[]][];
     /**
      * Create some Basura.
      *
@@ -88,15 +92,13 @@ export class Basura {
     };
     /** @type {WeakMap<any, any[]>} */
     weakMembers: WeakMap<any, any[]>;
-    rand: Random;
     funNumbers: number[];
     functionSpecies: string[];
     typedArrays: (ArrayBufferConstructor | DataViewConstructor | Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor | SharedArrayBufferConstructor | BigInt64ArrayConstructor | BigUint64ArrayConstructor)[];
     ErrorConstructors: (ErrorConstructor | AggregateErrorConstructor)[];
-    validWeak: string[];
     types: Record<string, BasuraGenerator<unknown>>;
+    validWeak: string[];
     typeNames: string[];
-    _randWeak(depth?: number, reason?: string): any;
     /**
      * Generate undefined.
      *
@@ -363,6 +365,7 @@ export class Basura {
      * @returns {any} Might generate... Anything!
      */
     generate(depth?: number): any;
+    #private;
 }
 /**
  * Function to generate basura of a certain type.  Called with `this` the
@@ -375,6 +378,10 @@ export type GenMeta = {
      */
     freq?: number;
     /**
+     * Generates a boxed type.
+     */
+    boxed?: boolean;
+    /**
      * Generator unsafe for CBOR.
      */
     cborUnsafe?: boolean;
@@ -382,7 +389,10 @@ export type GenMeta = {
      * Generator unsafe for JSON.
      */
     jsonUnsafe?: boolean;
+    /**
+     * Generates a type that can be weakly held.
+     */
+    weak?: boolean;
 };
 export type BasuraGenerator<T = unknown> = BasuraGen<T> & GenMeta;
-import { Random } from './random.js';
 import { Buffer } from 'buffer';
