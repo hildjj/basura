@@ -11,7 +11,7 @@
     "clean": "rimraf coverage .nyc_output/ docs data/*.json",
     "lint": "eslint .",
     "data": "node tools/create.js",
-    "docs": "typedoc lib/index.js",
+    "docs": "typedoc lib/index.js lib/random.js lib/vose.js lib/decorators.js",
     "coverage": "c8 npm test",
     "test": "ava",
     "predev": "npm run coverage",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@cto.af/eslint-config": "^4.0.1",
     "@fast-csv/parse": "^5.0.0",
-    "@types/node": "20.11.27",
+    "@types/node": "20.11.28",
     "ava": "^6.1.2",
     "c8": "9.1.0",
     "codepoints": "^1.3.0",

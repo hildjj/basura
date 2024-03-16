@@ -1,22 +1,25 @@
 /// <reference types="node" />
 /**
- * Function to generate random bytes.  This is pluggable to allow for testing,
- * but I bet someone else will find a reason to use it.
- *
- * @callback BasuraRandBytes
- * @param {number} size Number of bytes to generate.
- * @param {string} reason Reason the bytes are being generated.
- * @returns {Buffer} Random bytes.
- * @private
- */
-/**
  * Function to generate basura of a certain type.  Called with `this` the
  * current Basura instance.
  *
- * @callback BasuraGenerator
+ * @template [T=unknown]
+ * @callback BasuraGen
  * @param {number} [depth=0] How deep are we in the generated tree of objects
  *   already?
- * @returns {any} The generated basura.  Return null if too deep.
+ * @returns {T|null} The generated basura.  Return null if too deep.
+ */
+/**
+ * @typedef {object} GenMeta
+ * @property {number} [freq] Relative frequency for this generator.
+ * @property {boolean} [boxed] Generates a boxed type.
+ * @property {boolean} [cborUnsafe] Generator unsafe for CBOR.
+ * @property {boolean} [jsonUnsafe] Generator unsafe for JSON.
+ * @property {boolean} [weak] Generates a type that can be weakly held.
+ */
+/**
+ * @typedef {BasuraGen<T> & GenMeta} BasuraGenerator
+ * @template [T=unknown]
  */
 /**
  * Create garbage javascript types for testing.
@@ -35,6 +38,8 @@ export class Basura {
      * @returns {string} The modified string.
      */
     static quoteSymbols(str: string): string;
+    /** @type {[string, ...import("./decorators.js").MethodDecorator[]][]} */
+    static annotations: [string, ...import("./decorators.js").MethodDecorator[]][];
     /**
      * Create some Basura.
      *
@@ -47,8 +52,8 @@ export class Basura {
      * @param {boolean} [opts.noBoxed=false] Ignore boxed types, like String?
      * @param {boolean} [opts.output=false] Add custom inspect functions that
      *   make output parseable JS?
-     * @param {BasuraRandBytes} [opts.randBytes] Randomness source.  Defaults
-     *   to a thin wrapper around
+     * @param {import("./random").BasuraRandBytes} [opts.randBytes] Randomness
+     *   source.  Defaults to a thin wrapper around
      *   {@linkcode http://bit.ly/3dV5sSf crypto.randomBytes}.
      * @param {Array<string>} [opts.scripts] List of script names to select from
      *   for generating strings.  Defaults to all Unicode scripts from data.json.
@@ -66,7 +71,7 @@ export class Basura {
         jsonSafe?: boolean;
         noBoxed?: boolean;
         output?: boolean;
-        randBytes?: BasuraRandBytes;
+        randBytes?: import("./random").BasuraRandBytes;
         scripts?: Array<string>;
         stringLength?: number;
         types?: Record<string, BasuraGenerator | null>;
@@ -79,7 +84,7 @@ export class Basura {
         jsonSafe: boolean;
         noBoxed: boolean;
         output: boolean;
-        randBytes: BasuraRandBytes;
+        randBytes: import("./random").BasuraRandBytes;
         scripts: any;
         stringLength: number;
         types: Record<string, BasuraGenerator | null>;
@@ -87,95 +92,13 @@ export class Basura {
     };
     /** @type {WeakMap<any, any[]>} */
     weakMembers: WeakMap<any, any[]>;
-    spareGauss: number;
     funNumbers: number[];
     functionSpecies: string[];
     typedArrays: (ArrayBufferConstructor | DataViewConstructor | Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor | SharedArrayBufferConstructor | BigInt64ArrayConstructor | BigUint64ArrayConstructor)[];
     ErrorConstructors: (ErrorConstructor | AggregateErrorConstructor)[];
+    types: Record<string, BasuraGenerator<unknown>>;
     validWeak: string[];
-    types: Record<string, BasuraGenerator>;
     typeNames: string[];
-    /**
-     * Wrapper around this.opts.randBytes to default the reason.
-     *
-     * @param {number} num Number of bytes to generate.
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {Buffer} The random bytes.
-     * @private
-     */
-    private _randBytes;
-    /**
-     * Random unsigned 32-bit integer.
-     *
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {number} The random number.
-     * @private
-     */
-    private _randUInt32;
-    /**
-     * Random positive BigInt.
-     *
-     * @param {number} [bytes=-1] The number of bytes to generate, or -1
-     *   to generate up to stringLength bytes.
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {bigint} The random number.
-     * @private
-     */
-    private _randUBigInt;
-    /**
-     * Generate a random number (0,1].
-     *
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {number} The random number.
-     * @private
-     */
-    private _random01;
-    /**
-     * Generate a random number with close to gaussian distribution.
-     * Uses the polar method for normal deviates, which generates two
-     * numbers at a time.  Saves the second number for next time in a way
-     * that a different mean and standard deviation can be used on each
-     * call.
-     *
-     * @param {number} mean The mean for the set of numbers generated.
-     * @param {number} stdDev The standard deviation for the set of numbers
-     *   generated.
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {number} The random number.
-     * @private
-     */
-    private _randomGauss;
-    /**
-     * Generate a random positive integer less than a given number.
-     *
-     * @param {number} num One more than the maximum number generated.
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {number} The random number.
-     * @private
-     */
-    private _upto;
-    /**
-     * Pick an arbitrary element from the specified array.
-     *
-     * @template T
-     * @param {Array<T>} ary Array to pick from, MUST NOT be empty.
-     * @param {string} [reason='unspecified'] Reason reason for generation.
-     * @returns {T} The selected array element.
-     * @private
-     */
-    private _pick;
-    /**
-     * Pick zero or more of the array elements or string characters.
-     *
-     * @template T
-     * @param {string|Array<T>} ary Pool to select from.
-     * @param {string} [reason='unspecified'] Reason for generation.
-     * @returns {ary extends Array<T> ? T : string} The selected string
-     *   characters (concatenated) or the selected array elements.
-     * @private
-     */
-    private _some;
-    _randWeak(depth?: number, reason?: string): any;
     /**
      * Generate undefined.
      *
@@ -442,15 +365,34 @@ export class Basura {
      * @returns {any} Might generate... Anything!
      */
     generate(depth?: number): any;
+    #private;
 }
-/**
- * Function to generate random bytes.  This is pluggable to allow for testing,
- * but I bet someone else will find a reason to use it.
- */
-export type BasuraRandBytes = (size: number, reason: string) => Buffer;
 /**
  * Function to generate basura of a certain type.  Called with `this` the
  * current Basura instance.
  */
-export type BasuraGenerator = (depth?: number) => any;
+export type BasuraGen<T = unknown> = (depth?: number) => T | null;
+export type GenMeta = {
+    /**
+     * Relative frequency for this generator.
+     */
+    freq?: number;
+    /**
+     * Generates a boxed type.
+     */
+    boxed?: boolean;
+    /**
+     * Generator unsafe for CBOR.
+     */
+    cborUnsafe?: boolean;
+    /**
+     * Generator unsafe for JSON.
+     */
+    jsonUnsafe?: boolean;
+    /**
+     * Generates a type that can be weakly held.
+     */
+    weak?: boolean;
+};
+export type BasuraGenerator<T = unknown> = BasuraGen<T> & GenMeta;
 import { Buffer } from 'buffer';
