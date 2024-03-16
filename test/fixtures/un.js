@@ -3,6 +3,7 @@ import {Buffer} from 'buffer';
 import {Modnar} from './modnar.js';
 import {Scripts} from '../../lib/scripts.js';
 import assert from 'node:assert';
+import {decorateMethod} from '../../lib/decorators.js';
 import tlds from 'tlds2';
 import util from 'util';
 
@@ -100,6 +101,11 @@ export class Arusab extends Basura {
         `codepoint,${reason}`
       );
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  generate_undefined(depth = 0) {
+    return undefined;
   }
 
   generate_String(txt, depth) {
@@ -389,5 +395,12 @@ export class Arusab extends Basura {
       throw new Error(`invalid type: "${typ}"`);
     }
     f.call(this, o, depth + 1);
+  }
+
+  static {
+    // In the future, use JS decorators.
+    this.annotations.forEach(([nm, ...dex]) => decorateMethod(
+      dex, Arusab.prototype, `generate_${nm}`
+    ));
   }
 }

@@ -44,7 +44,7 @@ test('constructor edges', t => {
   const g = new Basura({
     types: {Array: null},
   });
-  t.not(Object.keys(b.opts.types).length, Object.keys(g.opts.types).length);
+  t.not(b.typeNames.length, g.typeNames.length);
 });
 
 test('quick', t => {

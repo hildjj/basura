@@ -4,10 +4,20 @@
  * current Basura instance.
  *
  * @template [T=unknown]
- * @callback BasuraGenerator
+ * @callback BasuraGen
  * @param {number} [depth=0] How deep are we in the generated tree of objects
  *   already?
  * @returns {T|null} The generated basura.  Return null if too deep.
+ */
+/**
+ * @typedef {object} GenMeta
+ * @property {number} [freq] Relative frequency for this generator.
+ * @property {boolean} [cborUnsafe] Generator unsafe for CBOR.
+ * @property {boolean} [jsonUnsafe] Generator unsafe for JSON.
+ */
+/**
+ * @typedef {BasuraGen<T> & GenMeta} BasuraGenerator
+ * @template [T=unknown]
  */
 /**
  * Create garbage javascript types for testing.
@@ -358,6 +368,21 @@ export class Basura {
  * Function to generate basura of a certain type.  Called with `this` the
  * current Basura instance.
  */
-export type BasuraGenerator<T = unknown> = (depth?: number) => T | null;
+export type BasuraGen<T = unknown> = (depth?: number) => T | null;
+export type GenMeta = {
+    /**
+     * Relative frequency for this generator.
+     */
+    freq?: number;
+    /**
+     * Generator unsafe for CBOR.
+     */
+    cborUnsafe?: boolean;
+    /**
+     * Generator unsafe for JSON.
+     */
+    jsonUnsafe?: boolean;
+};
+export type BasuraGenerator<T = unknown> = BasuraGen<T> & GenMeta;
 import { Random } from './random.js';
 import { Buffer } from 'buffer';
