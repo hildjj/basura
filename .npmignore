@@ -19,3 +19,4 @@ tools/
 tsconfig.json
 tutorials/
 .ncurc
+examples/

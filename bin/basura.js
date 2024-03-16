@@ -1,11 +1,11 @@
 #!/usr/bin/env -S node
 
 import {Command, InvalidOptionArgumentError} from 'commander';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {Basura} from '../lib/index.js';
-import {fileURLToPath} from 'url';
-import fs from 'fs';
-import path from 'path';
-import util from 'util';
+import fs from 'node:fs';
+import path from 'node:path';
+import util from 'node:util';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,17 +42,23 @@ const opts = program
   .option(
     '-a, --arrayLength <number>', 'Maximum array/object size', myParseInt, 10
   )
-  .option('-b, --noBoxed', 'Do not generate boxed types, like String')
-  .option('-c, --cborSafe', 'Do not generate types that break CBOR')
-  .option('-d, --depth <number>', 'Maximum depth', myParseInt, 5)
-  .option('-e, --edgeFreq <number>', 'Edge case frequency', myParse01, 0.1)
-  .option('-j, --json', 'Output JSON')
-  .option('-o, --output <file>', 'File to output')
+  .option('-b, --noBoxed', 'Do not generate boxed types, like String.')
+  .option('-c, --cborSafe', 'Do not generate types that break CBOR.')
+  .option('-d, --depth <number>', 'Maximum depth.', myParseInt, 5)
+  .option('-e, --edgeFreq <number>', 'Edge case frequency.', myParse01, 0.1)
   .option(
-    '-s, --stringLength <number>', 'Maximum string length', myParseInt, 20
+    '-i, --import <file>',
+    'Import the given file, and use its default export as an additional type generator.  Can be specified multiple times.',
+    (v, p) => p.concat([v]),
+    []
   )
-  .option('-t, --type <type>', 'Generate this specific type')
-  .option('-T, --listTypes', 'List all supported types, then exit')
+  .option('-j, --json', 'Output JSON, not generating any types that will not fit.')
+  .option('-o, --output <file>', 'File to output.')
+  .option(
+    '-s, --stringLength <number>', 'Maximum string length.', myParseInt, 20
+  )
+  .option('-t, --type <type>', 'Generate this specific type.')
+  .option('-T, --listTypes', 'List all supported types, then exit.')
   .addHelpText('after', `
 Examples:
   $ basura -t object
@@ -62,6 +68,17 @@ Examples:
 
 if (opts.json) {
   opts.jsonSafe = true;
+}
+
+opts.types = {};
+
+const cwdu = pathToFileURL(`${process.cwd()}/`);
+for (const i of opts.import) {
+  const u = new URL(i, cwdu);
+  const f = (await import(u)).default;
+  const m = f.name.match(/^generate_(?<cls>.*)/);
+  const nm = m ? m.groups.cls : f.name;
+  opts.types[nm] = f;
 }
 
 function main() {
@@ -77,7 +94,7 @@ function main() {
     const t = opts.type;
     delete opts.type;
     // eslint-disable-next-line no-useless-call
-    obj = g[`generate_${t}`].call(g);
+    obj = g.types[t].call(g);
   } else {
     obj = g.generate();
   }
