@@ -1,9 +1,9 @@
 import {UnicodeTrieBuilder} from '@cto.af/unicode-trie/builder.js';
 import codePoints from 'codepoints';
-import {fileURLToPath} from 'url';
-import fs from 'fs';
+import {fileURLToPath} from 'node:url';
+import fs from 'node:fs';
 import {parseFile} from '@fast-csv/parse';
-import path from 'path';
+import path from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

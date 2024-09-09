@@ -1,10 +1,11 @@
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import * as ntest from 'node:test';
 import {Arusab} from './fixtures/un.js';
 import {Basura} from '../lib/index.js';
-import Module from 'module';
+import Module from 'node:module';
 import example from './fixtures/example.js';
 import test from 'ava';
-import util from 'util';
+import util from 'node:util';
 
 test.beforeEach(t => {
   const a = new Arusab({arrayLength: 1000});
@@ -282,7 +283,7 @@ test('Promise', async t => {
   await t.throwsAsync(() => o.generate_Promise(), {message: 'rover'});
 });
 
-test('unhandled reject ok', t => new Promise((resolve, reject) => {
+test('unhandled reject ok', t => new Promise((resolve, _reject) => {
   Promise.reject(new Error('Testing unhandled', {cause: 'BasuraGenerated'}));
   process.nextTick(() => {
     t.pass();

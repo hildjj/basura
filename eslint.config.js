@@ -16,6 +16,7 @@ export default [
     rules: {
       'jsdoc/valid-types': 'off', // Let tsc handle this.
       'jsdoc/check-types': 'off', // Let tsc handle this.
+      'jsdoc/lines-before-block': 'off', // Not configurable
     },
   },
   ...ava,

@@ -1,10 +1,10 @@
 import {Basura} from '../lib/index.js';
-import {Buffer} from 'buffer';
-import {fileURLToPath} from 'url';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import {spawn} from 'child_process';
+import {Buffer} from 'node:buffer';
+import {fileURLToPath} from 'node:url';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {spawn} from 'node:child_process';
 import test from 'ava';
 
 const __filename = fileURLToPath(import.meta.url);

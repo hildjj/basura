@@ -1,11 +1,11 @@
 import {Basura} from '../../lib/index.js';
-import {Buffer} from 'buffer';
+import {Buffer} from 'node:buffer';
 import {Modnar} from './modnar.js';
 import {Scripts} from '../../lib/scripts.js';
 import assert from 'node:assert';
 import {decorateMethod} from '../../lib/decorators.js';
 import tlds from 'tlds2';
-import util from 'util';
+import util from 'node:util';
 
 const scripts = Scripts.instance();
 const ONEISH = 1 - Number.EPSILON;
@@ -32,11 +32,11 @@ export class Arusab extends Basura {
     return this.rand.drop(reason);
   }
 
-  generate_boolean(b, depth = 0, reason = 'boolean') {
+  generate_boolean(b, _depth = 0, reason = 'boolean') {
     this.rand.bool(b, reason);
   }
 
-  generate_Boolean(b, depth = 0) {
+  generate_Boolean(b, _depth = 0) {
     this.rand.bool(b, 'Boolean');
   }
 
@@ -61,7 +61,7 @@ export class Arusab extends Basura {
     this.rand.bytes(b, 'number');
   }
 
-  generate_Number(n, depth = 0) {
+  generate_Number(n, _depth = 0) {
     this.generate_number(n.valueOf());
   }
 
@@ -73,7 +73,7 @@ export class Arusab extends Basura {
     this.rand.bytes(Buffer.concat([b]), 'Buffer');
   }
 
-  generate_string(txt, depth, reason = 'string') {
+  generate_string(txt, _depth, reason = 'string') {
     const cp = txt.codePointAt(0);
     const {script} = scripts.chars.get(cp);
     this.rand.pick(script, this.opts.scripts, `script,${reason}`);
@@ -104,7 +104,7 @@ export class Arusab extends Basura {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  generate_undefined(depth = 0) {
+  generate_undefined(_depth = 0) {
     return undefined;
   }
 
@@ -244,7 +244,7 @@ export class Arusab extends Basura {
     this.generate_boolean(neg, depth, 'uBigInt sign');
   }
 
-  generate_Date(depth = 0) {
+  generate_Date(_depth = 0) {
     const n = this.rand.gauss(Date.now(), 315569520000, 'date');
     return new Date(n);
   }
@@ -354,7 +354,7 @@ export class Arusab extends Basura {
     this.rand.pick(fin, this.functionSpecies, 'function species');
   }
 
-  generate_Generator(g, depth = 0) {
+  generate_Generator(g, _depth = 0) {
     const o = this.weakMembers.get(g);
     this.generate_Array(o);
   }

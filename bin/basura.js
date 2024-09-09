@@ -93,7 +93,6 @@ function main() {
   if (opts.type) {
     const t = opts.type;
     delete opts.type;
-    // eslint-disable-next-line no-useless-call
     obj = g.types[t].call(g);
   } else {
     obj = g.generate();
