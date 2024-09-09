@@ -78,7 +78,7 @@ export class Modnar {
     }
   }
 
-  uBigInt(n, bytes, reason = 'unspecified') {
+  uBigInt(n, _bytes, reason = 'unspecified') {
     assert(n >= 0n);
     let str = n.toString(16);
     if (str.length % 2 !== 0) {

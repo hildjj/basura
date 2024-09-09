@@ -11,7 +11,7 @@ Unicode script, so they at least look vaguely interesting.
 
 ## Command line
 
-```
+```text
 Usage: basura [options]
 
 Generate a random JavaScript object
@@ -19,15 +19,17 @@ Generate a random JavaScript object
 Options:
   -V, --version                output the version number
   -a, --arrayLength <number>   Maximum array/object size (default: 10)
-  -b, --noBoxed                Do not generate boxed types, like String.
+  -b, --noBoxed                Do not generate boxed types, like
+                               String.
   -c, --cborSafe               Do not generate types that break CBOR.
   -d, --depth <number>         Maximum depth. (default: 5)
   -e, --edgeFreq <number>      Edge case frequency. (default: 0.1)
-  -i, --import <file>          Import the given file, and use its default
-                               export as an additional type generator.  Can be
-                               specified multiple times. (default: [])
-  -j, --json                   Output JSON, not generating any types that will
-                               not fit.
+  -i, --import <file>          Import the given file, and use its
+                               default export as an additional type
+                               generator.  Can be specified multiple
+                               times. (default: [])
+  -j, --json                   Output JSON, not generating any types
+                               that will not fit.
   -o, --output <file>          File to output.
   -s, --stringLength <number>  Maximum string length. (default: 20)
   -t, --type <type>            Generate this specific type.
@@ -119,8 +121,10 @@ console.log(b.generate_Date()) // Example output: 2011-02-16T11:28:41.539Z
 console.log(b.generate()) // Some possibly-large chunk of JS
 ```
 
-See some example output in the [examples](examples) directory.
+See some example output in the
+[examples](https://github.com/hildjj/basura/tree/main/examples)
+directory.
 
 ---
 [![Tests](https://github.com/hildjj/basura/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/basura/actions/workflows/node.js.yml)
-[![Coverage Status](https://coveralls.io/repos/github/hildjj/basura/badge.svg?branch=main)](https://coveralls.io/github/hildjj/basura?branch=main)
+[![codecov](https://codecov.io/gh/hildjj/basura/graph/badge.svg?token=KB5O5NFTKS)](https://codecov.io/gh/hildjj/basura)

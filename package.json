@@ -8,10 +8,10 @@
   },
   "types": "types/index.d.ts",
   "scripts": {
-    "clean": "rimraf coverage .nyc_output/ docs data/*.json",
+    "clean": "rm -rf coverage docs data/*.json",
     "lint": "eslint .",
     "data": "node tools/create.js",
-    "docs": "typedoc lib/index.js lib/random.js lib/vose.js lib/decorators.js",
+    "docs": "typedoc",
     "coverage": "c8 npm test",
     "test": "ava",
     "predev": "npm run coverage",
@@ -40,26 +40,25 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@cto.af/unicode-trie": "2.0.0",
-    "commander": "^12.0.0",
-    "tlds2": "2.2.13"
+    "@cto.af/unicode-trie": "2.0.1",
+    "commander": "^12.1.0",
+    "tlds2": "2.2.15"
   },
   "devDependencies": {
-    "@cto.af/eslint-config": "^4.0.1",
+    "@cto.af/eslint-config": "^4.1.6",
     "@fast-csv/parse": "^5.0.0",
-    "@types/node": "20.11.28",
-    "ava": "^6.1.2",
-    "c8": "9.1.0",
+    "@types/node": "22.5.4",
+    "ava": "^6.1.3",
+    "c8": "10.1.2",
     "codepoints": "^1.3.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-ava": "^14.0.0",
-    "eslint-plugin-jsdoc": "48.2.1",
+    "eslint": "^9.10.0",
+    "eslint-plugin-ava": "^15.0.1",
+    "eslint-plugin-jsdoc": "50.2.2",
     "eslint-plugin-node": "^11.1.0",
-    "rimraf": "5.0.5",
-    "typedoc": "0.25.12",
-    "typescript": "5.4.2"
+    "typedoc": "0.26.7",
+    "typescript": "5.5.4"
   },
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@9.9.0",
   "engines": {
     "node": ">=18"
   }
