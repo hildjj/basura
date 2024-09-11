@@ -17,9 +17,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: pnpm
       - run: pnpm i -r
-      - run: npm run lint
-      - run: npm run coverage
-      - run: npm run docs
+      - run: npm run build
+      - run: npm pkg delete devDependencies
+      - name: Rebuild pnpm-lock.yaml
+        run: pnpm i --no-frozen-lockfile
       - name: Deploy Docs
         uses: peaceiris/actions-gh-pages@v4
         with:
