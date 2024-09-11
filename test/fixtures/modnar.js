@@ -1,6 +1,6 @@
 import {Buffer} from 'node:buffer';
-import {Random} from '../../lib/random.js';
-import {Vose} from '../../lib/vose.js';
+import {Random} from '@cto.af/random';
+import {Vose} from '@cto.af/random/lib/vose.js';
 import assert from 'node:assert';
 import util from 'node:util';
 

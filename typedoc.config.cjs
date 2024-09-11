@@ -5,7 +5,6 @@ module.exports = {
   entryPoints: [
     'lib/index.js',
     'lib/decorators.js',
-    'lib/random.js',
   ],
   out: 'docs',
   cleanOutputDir: true,

@@ -17,6 +17,7 @@ export default [
       'jsdoc/valid-types': 'off', // Let tsc handle this.
       'jsdoc/check-types': 'off', // Let tsc handle this.
       'jsdoc/lines-before-block': 'off', // Not configurable
+      'jsdoc/imports-as-dependencies': 'off', // See: https://github.com/gajus/eslint-plugin-jsdoc/issues/1114
     },
   },
   ...ava,
