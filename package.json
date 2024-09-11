@@ -8,7 +8,7 @@
   },
   "types": "types/index.d.ts",
   "scripts": {
-    "clean": "rm -rf coverage docs data/*.json",
+    "clean": "rm -rf coverage docs data/*.json lib/data.js",
     "lint": "eslint .",
     "data": "node tools/create.js",
     "docs": "typedoc",

@@ -3,6 +3,7 @@
 .vscode/
 *.js.map
 coverage/
+data/*.json
 docs/
 lib/data.js
 node_modules/
