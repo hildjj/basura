@@ -17,7 +17,7 @@
     "predev": "npm run coverage",
     "types": "tsc",
     "prebuild": "npm run clean",
-    "build": "npm run data && npm run types && npm run docs && npm run coverage && npm pack --dry-run"
+    "build": "npm run data && npm run types && npm run lint && npm run docs && npm run coverage && npm pack --dry-run"
   },
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "description": "Generate random JavaScript",
