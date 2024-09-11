@@ -20,3 +20,4 @@ tsconfig.json
 tutorials/
 .ncurc
 examples/
+typedoc.config.cjs
