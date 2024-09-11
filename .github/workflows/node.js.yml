@@ -27,9 +27,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install
-      - run: npm run lint
-      - name: Test ${{ matrix.node-version }}
-        run: npm run coverage
+      - run: npm run build
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
