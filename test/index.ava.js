@@ -66,7 +66,12 @@ test('playback', t => {
 
   p = o.generate();
   const insp = Basura.quoteSymbols(
-    util.inspect(p, {colors: false, depth: Infinity})
+    util.inspect(p, {
+      colors: false,
+      depth: Infinity,
+      maxArrayLength: Infinity,
+      maxStringLength: Infinity,
+    })
   );
   const str = `\
 'use strict'

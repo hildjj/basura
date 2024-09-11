@@ -1,10 +1,9 @@
-/// <reference types="node" />
 /**
  * Function to generate basura of a certain type.  Called with `this` the
  * current Basura instance.
  *
- * @typedef {(this: Basura, depth?: number) => T|null} BasuraGen
  * @template [T=unknown]
+ * @typedef {(this: Basura, depth?: number) => T|null} BasuraGen
  */
 /**
  * @typedef {object} GenMeta
@@ -15,8 +14,8 @@
  * @property {boolean} [weak] Generates a type that can be weakly held.
  */
 /**
- * @typedef {BasuraGen<T> & GenMeta} BasuraGenerator
  * @template [T=unknown]
+ * @typedef {BasuraGen<T> & GenMeta} BasuraGenerator
  */
 /**
  * Create garbage javascript types for testing.
@@ -49,7 +48,7 @@ export class Basura {
      * @param {boolean} [opts.noBoxed=false] Ignore boxed types, like String?
      * @param {boolean} [opts.output=false] Add custom inspect functions that
      *   make output parseable JS?
-     * @param {import("./random").BasuraRandBytes} [opts.randBytes] Randomness
+     * @param {import('@cto.af/random').RandBytes} [opts.randBytes] Randomness
      *   source.  Defaults to a thin wrapper around
      *   {@linkcode http://bit.ly/3dV5sSf crypto.randomBytes}.
      * @param {Array<string>} [opts.scripts] List of script names to select from
@@ -68,7 +67,7 @@ export class Basura {
         jsonSafe?: boolean;
         noBoxed?: boolean;
         output?: boolean;
-        randBytes?: import("./random").BasuraRandBytes;
+        randBytes?: import("@cto.af/random").RandBytes;
         scripts?: Array<string>;
         stringLength?: number;
         types?: Record<string, BasuraGenerator | null>;
@@ -81,7 +80,7 @@ export class Basura {
         jsonSafe: boolean;
         noBoxed: boolean;
         output: boolean;
-        randBytes: import("./random").BasuraRandBytes;
+        randBytes: import("@cto.af/random").RandBytes;
         scripts: any;
         stringLength: number;
         types: Record<string, BasuraGenerator | null>;
@@ -99,55 +98,55 @@ export class Basura {
     /**
      * Generate undefined.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @returns {undefined} Always returns undefined.
      */
-    generate_undefined(depth?: number): undefined;
+    generate_undefined(_depth?: number): undefined;
     /**
      * Generate boolean.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @param {string} [reason='boolean'] Reason for generating bool.
      * @returns {boolean} True or false.
      */
-    generate_boolean(depth?: number, reason?: string): boolean;
+    generate_boolean(_depth?: number, reason?: string): boolean;
     /**
      * Generate boxed Boolean.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @returns {Boolean} New Boolean(true) or new Boolean(false).
      */
-    generate_Boolean(depth?: number): boolean;
+    generate_Boolean(_depth?: number): boolean;
     /**
      * Generate signed 32-bit integer.
      * Note: may be folded into generate_number later.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @returns {number} 32-bit integer.
      */
-    generate_integer(depth?: number): number;
+    generate_integer(_depth?: number): number;
     /**
      * Generate 64-bit floating point number, with a 10% chance of something
      * "fun": 0, -0, NaN, Infinity, -Infinity.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @returns {number} Number or edge case.
      */
-    generate_number(depth?: number): number;
+    generate_number(_depth?: number): number;
     /**
      * Generate boxed 64-bit floating point Number, with a 10% chance of something
      * "fun": 0, -0, NaN, Infinity, -Infinity.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @returns {Number} Wrapped new Number(num).
      */
-    generate_Number(depth?: number): number;
+    generate_Number(_depth?: number): number;
     /**
      * Generate a {@linkcode https://nodejs.org/api/buffer.html Buffer} of up
      * to stringLength size.
@@ -161,13 +160,13 @@ export class Basura {
      * Generate a string of up to stringLength size, all from the same random
      * Unicode script.  The first codepoint will not be a combining character.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @param {string} [reason='string'] Reason for generation, since this
      *   function is called by others.
      * @returns {string} Generated string.
      */
-    generate_string(depth?: number, reason?: string): string;
+    generate_string(_depth?: number, reason?: string): string;
     /**
      * Generate a boxed String of up to stringLength size, all from the same
      * random Unicode script.  The first codepoint will not be a combining
@@ -257,11 +256,11 @@ export class Basura {
      * Generate a random Date, gaussian-distributed around today with a standard
      * deviation of 10 years.
      *
-     * @param {number} [depth=0] How deep are we in the generated tree of
+     * @param {number} [_depth=0] How deep are we in the generated tree of
      *   objects already?
      * @returns {Date} Generated Date.
      */
-    generate_Date(depth?: number): Date;
+    generate_Date(_depth?: number): Date;
     /**
      * Generate a random Error.  If an AggregateError is selected, fill it with
      * random Errors.
@@ -337,8 +336,9 @@ export class Basura {
     generate_Set(depth?: number): Set<any>;
     /**
      * Generate a function of a random "species".  The current species list is
-     * stored in this.functionSpecies.  See [tutorial](tutorials/functions.md) for
-     * more information.  If we are already too deep, generates `() => {}`.
+     * stored in this.functionSpecies.  See
+     * [tutorial](https://github.com/hildjj/basura/blob/main/tutorials/functions.md)
+     * for more information.  If we are already too deep, generates `() => {}`.
      *
      * @param {number} [depth=0] How deep are we in the generated tree of
      *   objects already?
@@ -392,4 +392,4 @@ export type GenMeta = {
     weak?: boolean;
 };
 export type BasuraGenerator<T = unknown> = BasuraGen<T> & GenMeta;
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer';

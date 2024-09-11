@@ -37,5 +37,5 @@ export class Scripts {
      */
     get(script: string, filter?: boolean | Array<string>): Array<CodePoint>;
 }
-export type CodePoint = import('./chars.js').CodePoint;
+export type CodePoint = import("./chars.js").CodePoint;
 import { Chars } from './chars.js';
