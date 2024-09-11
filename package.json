@@ -40,7 +40,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@cto.af/random": "0.0.3",
+    "@cto.af/random": "0.0.4",
     "@cto.af/unicode-trie": "2.0.1",
     "commander": "^12.1.0",
     "tlds2": "2.2.15"
