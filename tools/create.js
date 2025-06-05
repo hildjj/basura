@@ -1,5 +1,5 @@
-import {UnicodeTrieBuilder} from '@cto.af/unicode-trie/builder.js';
-import codePoints from 'codepoints';
+import {UnicodeTrieBuilder} from '@cto.af/unicode-trie/builder';
+import cpParser from 'codepoints/parser.js';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs';
 import {parseFile} from '@fast-csv/parse';
@@ -27,6 +27,7 @@ let scriptShift = 0;
 let categoryShift = 0;
 let invalid = 0;
 
+const codePoints = cpParser(path.join(DATA, 'ucd'));
 for (const codePoint of codePoints) {
   if ((codePoint != null) && (codePoint.script != null)) {
     if (categories[codePoint.category] == null) {

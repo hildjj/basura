@@ -5,6 +5,7 @@
 coverage/
 data/*.json
 docs/
-lib/data.js
 node_modules/
 TODO
+types/
+data/ucd/

@@ -123,8 +123,9 @@ export class Arusab extends Basura {
     this.rand.pick(url.protocol, [
       'http:', 'https:', 'ftp:',
     ], 'URL proto');
-    const m = url.hostname.match(/(?<tu>.*)\.(?<tld>[^.]+)$/);
-    const {tu, tld} = m.groups;
+    const m = url.hostname.split('.');
+    const tld = m[m.length - 1];
+    const tu = m.slice(0, -1).join('.');
 
     this.rand.pick(tld.toUpperCase(), tlds.top, 'URL tld');
 
@@ -384,6 +385,8 @@ export class Arusab extends Basura {
           typ = o.constructor.name;
         } else if (util.types.isProxy(o)) {
           typ = 'Proxy';
+        } else {
+          throw new Error(`Unknown object: ${o}`);
         }
         break;
       default:

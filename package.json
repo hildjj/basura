@@ -7,6 +7,12 @@
     "basura": "bin/basura.js"
   },
   "types": "types/index.d.ts",
+  "files": [
+    "bin/*",
+    "data/data.json",
+    "lib/*",
+    "types/*"
+  ],
   "scripts": {
     "clean": "rm -rf coverage docs data/*.json lib/data.js",
     "lint": "eslint .",
@@ -14,10 +20,8 @@
     "docs": "typedoc",
     "coverage": "c8 npm test",
     "test": "ava",
-    "predev": "npm run coverage",
     "types": "tsc",
-    "prebuild": "npm run clean",
-    "build": "npm run data && npm run types && npm run lint && npm run docs && npm run coverage && npm pack --dry-run"
+    "build": "npm run types && npm run lint && npm run docs && npm run coverage && npm pack --dry-run"
   },
   "author": "Joe Hildebrand <joe-github@cursive.net>",
   "description": "Generate random JavaScript",
@@ -40,27 +44,28 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@cto.af/random": "0.0.4",
-    "@cto.af/unicode-trie": "2.0.1",
-    "commander": "^12.1.0",
-    "tlds2": "2.2.15"
+    "@cto.af/random": "2.0.0",
+    "@cto.af/unicode-trie": "3.2.3",
+    "@cto.af/unicode-trie-runtime": "3.2.3",
+    "commander": "^14.0.0",
+    "tlds2": "2.2.17"
   },
   "devDependencies": {
-    "@cto.af/eslint-config": "^4.1.6",
-    "@fast-csv/parse": "^5.0.0",
-    "@types/node": "22.5.4",
-    "ava": "^6.1.3",
-    "c8": "10.1.2",
-    "codepoints": "^1.3.0",
-    "eslint": "^9.10.0",
+    "@cto.af/eslint-config": "^6.0.5",
+    "@fast-csv/parse": "5.0.2",
+    "@types/node": "22.15.29",
+    "ava": "^6.3.0",
+    "c8": "10.1.3",
+    "codepoints": "1.3.0",
+    "eslint": "^9.28.0",
     "eslint-plugin-ava": "^15.0.1",
-    "eslint-plugin-jsdoc": "50.2.2",
+    "eslint-plugin-jsdoc": "50.7.1",
     "eslint-plugin-node": "^11.1.0",
-    "typedoc": "0.26.7",
-    "typescript": "5.6.2"
+    "typedoc": "0.28.5",
+    "typescript": "5.8.3"
   },
-  "packageManager": "pnpm@9.10.0",
+  "packageManager": "pnpm@10.11.1",
   "engines": {
-    "node": ">=18"
+    "node": ">=20.4"
   }
 }
