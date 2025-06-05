@@ -3,7 +3,6 @@
 .vscode/
 *.js.map
 coverage/
-data/*.json
 docs/
 node_modules/
 TODO
