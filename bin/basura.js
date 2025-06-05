@@ -71,6 +71,7 @@ if (opts.json) {
 }
 
 opts.types = {};
+opts.fakeSymbols = true;
 
 const cwdu = pathToFileURL(`${process.cwd()}/`);
 for (const i of opts.import) {
@@ -98,7 +99,7 @@ function main() {
     obj = g.generate();
   }
 
-  let str = opts.json ?
+  const str = opts.json ?
     JSON.stringify(obj, null, 2) :
     util.inspect(obj, {
       depth: Infinity,
@@ -114,7 +115,6 @@ function main() {
     }
     if (!opts.json) {
       out.write('export default ');
-      str = Basura.quoteSymbols(str);
     }
   }
   out.write(str);

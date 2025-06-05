@@ -125,6 +125,17 @@ See some example output in the
 [examples](https://github.com/hildjj/basura/tree/main/examples)
 directory.
 
+## Development
+
+To recreate `lib/data.js`:
+
+- Unzip a copy of the
+  [Unicode Database](https://www.unicode.org/Public/zipped/latest/UCD.zip)
+  into `data/ucd`
+- `npm run data`
+
+TODO: the IDNA properties are based on Unicode 12.
+
 ---
 [![Tests](https://github.com/hildjj/basura/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/basura/actions/workflows/node.js.yml)
 [![codecov](https://codecov.io/gh/hildjj/basura/graph/badge.svg?token=KB5O5NFTKS)](https://codecov.io/gh/hildjj/basura)

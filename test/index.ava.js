@@ -1,4 +1,3 @@
-// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import * as ntest from 'node:test';
 import {Arusab} from './fixtures/un.js';
 import {Basura} from '../lib/index.js';
@@ -17,6 +16,7 @@ test.beforeEach(t => {
   const o = new Basura({
     arrayLength: 1000,
     randBytes: a.source,
+    fakeSymbols: true,
     output: true,
   });
   t.context = {
@@ -65,14 +65,12 @@ test('playback', t => {
   a.generate(example);
 
   p = o.generate();
-  const insp = Basura.quoteSymbols(
-    util.inspect(p, {
-      colors: false,
-      depth: Infinity,
-      maxArrayLength: Infinity,
-      maxStringLength: Infinity,
-    })
-  );
+  const insp = util.inspect(p, {
+    colors: false,
+    depth: Infinity,
+    maxArrayLength: Infinity,
+    maxStringLength: Infinity,
+  });
   const str = `\
 'use strict'
 module.exports = ${insp}\n`;
@@ -199,11 +197,6 @@ test('functions', t => {
     o.generate().map(f => util.inspect(f, {colors: false, depth: Infinity})),
     funcs.map(f => f.toString())
   );
-});
-
-test('quote symbols', t => {
-  t.is(Basura.quoteSymbols('Symbol(foo)'), 'Symbol.for(\'foo\')');
-  t.is(Basura.quoteSymbols('Symbol())'), 'Symbol.for(\')\')');
 });
 
 test('date', t => {
