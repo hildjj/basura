@@ -25,6 +25,7 @@ export default [
     files: ['bin/*.js'],
     rules: {
       'no-console': 'off',
+      'n/no-top-level-await': 'off',
     },
   },
 ];

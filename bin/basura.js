@@ -34,6 +34,12 @@ function myParse01(value, _prev) {
   return v;
 }
 
+function myParseArray(value, prev) {
+  prev ??= [];
+  prev.push(...value.split(/,/g).map(v => v.trim()));
+  return prev;
+}
+
 const program = new Command();
 const opts = program
   .version(pkg.version)
@@ -47,16 +53,16 @@ const opts = program
   .option('-d, --depth <number>', 'Maximum depth.', myParseInt, 5)
   .option('-e, --edgeFreq <number>', 'Edge case frequency.', myParse01, 0.1)
   .option(
-    '-i, --import <file>',
-    'Import the given file, and use its default export as an additional type generator.  Can be specified multiple times.',
-    (v, p) => p.concat([v]),
-    []
+    '-i, --import <files>',
+    'Import the given files (comma-separated), and use its default export as an additional type generator.  Can be specified multiple times.',
+    myParseArray
   )
   .option('-j, --json', 'Output JSON, not generating any types that will not fit.')
   .option('-o, --output <file>', 'File to output.')
   .option(
     '-s, --stringLength <number>', 'Maximum string length.', myParseInt, 20
   )
+  .option('--scripts <names>', 'Generate strings only with these scripts (comma-separated).  Can be specified multiple times.', myParseArray)
   .option('-t, --type <type>', 'Generate this specific type.')
   .option('-T, --listTypes', 'List all supported types, then exit.')
   .addHelpText('after', `
@@ -74,12 +80,14 @@ opts.types = {};
 opts.fakeSymbols = true;
 
 const cwdu = pathToFileURL(`${process.cwd()}/`);
-for (const i of opts.import) {
-  const u = new URL(i, cwdu);
-  const f = (await import(u)).default;
-  const m = f.name.match(/^generate_(?<cls>.*)/);
-  const nm = m ? m.groups.cls : f.name;
-  opts.types[nm] = f;
+if (opts.import) {
+  for (const i of opts.import) {
+    const u = new URL(i, cwdu);
+    const f = (await import(u)).default;
+    const m = f.name.match(/^generate_(?<cls>.*)/);
+    const nm = m ? m.groups.cls : f.name;
+    opts.types[nm] = f;
+  }
 }
 
 function main() {
