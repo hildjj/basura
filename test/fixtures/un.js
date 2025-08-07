@@ -1,7 +1,7 @@
+import {Scripts, ZALGO} from '../../lib/scripts.js';
 import {Basura} from '../../lib/index.js';
 import {Buffer} from 'node:buffer';
-import {Modnar} from './modnar.js';
-import {Scripts} from '../../lib/scripts.js';
+import {Modnar} from '@cto.af/random/test';
 import assert from 'node:assert';
 import {decorateMethod} from '../../lib/decorators.js';
 import tlds from 'tlds2';
@@ -9,6 +9,9 @@ import util from 'node:util';
 
 const scripts = Scripts.instance();
 const ONEISH = 1 - Number.EPSILON;
+const ZM = new Set(ZALGO.M);
+const ZB = new Set(ZALGO.B);
+const ZT = new Set(ZALGO.T);
 
 /**
  * Un-generate garbage.  Inverse of Basura, for creating test cases.
@@ -74,32 +77,61 @@ export class Arusab extends Basura {
   }
 
   generate_string(txt, _depth, reason = 'string') {
-    const cp = txt.codePointAt(0);
-    const {script} = scripts.chars.get(cp);
+    const scp = txt.codePointAt(0);
+    const {script} = scripts.chars.get(scp);
     this.rand.pick(script, this.opts.scripts, `script,${reason}`);
     const points = scripts.get(script);
-    let len = txt.length;
     const chars = [...txt]; // Splits on codepoint boundaries
+    let z = ONEISH;
 
     // Scan the string once, reducing the length by the number of initial
     // combining characters
+    const clusters = [];
     for (const char of chars) {
-      const info = points.find(ch => ch.code === char.codePointAt(0));
-      if (info && info.category === 'Mn') {
-        len--;
+      const cp = char.codePointAt(0);
+      const info = scripts.chars.get(cp);
+      if (info?.category === 'Mn' && info.script === 'Inherited') {
+        z = 0;
+        const last = clusters.length - 1;
+        if (ZM.has(cp)) {
+          clusters[last].M.push(cp);
+        } else if (ZB.has(cp)) {
+          clusters[last].B.push(cp);
+        } else if (ZT.has(cp)) {
+          clusters[last].T.push(cp);
+        } else {
+          throw new Error(`Unknown Zalgo: ${cp} "${char}"`);
+        }
       } else {
-        break;
+        clusters.push({char, M: [], T: [], B: []});
       }
     }
 
-    this.rand.upto(len, this.opts.stringLength, `stringLength,${reason}`);
+    this.rand.upto(clusters.length, this.opts.stringLength, `stringLength,${reason}`);
+
+    if (this.opts.zalgoFreq && this.opts.zalgoHeight) {
+      this.rand.random(z, `zalgoFreq,${reason}`);
+    }
+
     const codes = points.map(c => c.code);
-    for (const char of chars) {
+    for (const {char, M, T, B} of clusters) {
       this.rand.pick(
         char.codePointAt(0),
         codes,
         `codepoint,${reason}`
       );
+      if (z === 0) {
+        assert.equal(M.length, 1);
+        this.rand.pick(M[0], ZALGO.M, `M,zalgo,${reason}`);
+        this.rand.upto(T.length, this.opts.zalgoHeight, `numTop,zalgo,${reason}`);
+        for (let i = 0; i < T.length; i++) {
+          this.rand.pick(T[i], ZALGO.T, `T,zalgo,${reason}`);
+        }
+        this.rand.upto(B.length, this.opts.zalgoHeight, `numBottom,zalgo,${reason}`);
+        for (let i = 0; i < B.length; i++) {
+          this.rand.pick(B[i], ZALGO.B, `B,zalgo,${reason}`);
+        }
+      }
     }
   }
 
@@ -241,7 +273,7 @@ export class Arusab extends Basura {
       this.opts.stringLength - 1,
       'uBigInt len'
     );
-    this.rand.bytes(buf, 'uBigInt,uBigInt unsigned');
+    this.rand.bytes(buf, `${buf.length},uBigInt,uBigInt unsigned`);
     this.generate_boolean(neg, depth, 'uBigInt sign');
   }
 
