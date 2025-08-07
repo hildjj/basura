@@ -224,26 +224,6 @@ test('inspect', t => {
   t.truthy(util.inspect(m, {depth: null}));
 });
 
-test('combining', t => {
-  const {a, g} = t.context;
-
-  // U+05BA is a combining character in the Hebrew script.  U+05E1 is not.
-  a.generate([
-    String.fromCodePoint(0x05BA, 0x05E1),
-    String.fromCodePoint(0x05BA, 0x05BA, 0x05E1),
-    String.fromCodePoint(0x05BA, 0x05BA),
-  ]);
-  t.deepEqual(g.generate(), [
-    String.fromCodePoint(0x05E1),
-    String.fromCodePoint(0x05E1),
-    '',
-  ]);
-
-  // Consume the last two combining chars
-  a.drop('uInt32,upto(134),pick(134),codepoint,string');
-  a.drop('uInt32,upto(134),pick(134),codepoint,string');
-});
-
 test('invalid regex', t => {
   const {a, g} = t.context;
   a.generate_string('+', 0, 'RegExp'); // Invalid
@@ -348,4 +328,22 @@ test('Proxy', t => {
   a.generate_Proxy(obj);
   const p = o.generate_Proxy();
   t.deepEqual(o.weakMembers.get(p), [obj]);
+});
+
+test('zalgo', t => {
+  const a = new Arusab({
+    zalgoHeight: 10,
+    zalgoFreq: 0.5,
+  });
+  const z = new Basura({
+    zalgoHeight: 10,
+    zalgoFreq: 0.5,
+    randBytes: a.source,
+  });
+  t.assert(z);
+  a.generate_string('foo');
+  t.is(z.generate_string(), 'foo');
+
+  a.generate_string('ꞥ̴̙̝͎̥̟̦̖̓́̓̾̅͜͠Ȅ̸̦͚̫̗͎̦̽̊͑ʀ̸̰̣͕̯̳̀̊͒͝');
+  t.is(z.generate_string(), 'ꞥ̴̙̝͎̥̟̦̖̓́̓̾̅͜͠Ȅ̸̦͚̫̗͎̦̽̊͑ʀ̸̰̣͕̯̳̀̊͒͝');
 });

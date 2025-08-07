@@ -65,6 +65,8 @@ const opts = program
   .option('--scripts <names>', 'Generate strings only with these scripts (comma-separated).  Can be specified multiple times.', myParseArray)
   .option('-t, --type <type>', 'Generate this specific type.')
   .option('-T, --listTypes', 'List all supported types, then exit.')
+  .option('-z, --zalgoHeight <number>', 'Max Zalgo height', myParseInt, 0)
+  .option('-Z, --zalgoFreq <number>', 'Zalgo frequency', myParse01, 0.2)
   .addHelpText('after', `
 Examples:
   $ basura -t object
