@@ -11,10 +11,11 @@ class Foo {
   }
 }
 
+/** @import {BasuraGenerator} from '../../lib/index.js' */
 /**
  * Generate a Foo.
  *
- * @type {import("../../lib/index.js").BasuraGenerator}
+ * @type {BasuraGenerator}
  */
 export default function generate_Foo(depth = 0) {
   if (depth > this.opts.depth) {

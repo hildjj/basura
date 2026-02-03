@@ -143,7 +143,6 @@ test('functions', t => {
     // eslint-disable-next-line no-eval
     eval(`async() => '${val}'`),
     // [AsyncFunction: anonymous]
-    // eslint-disable-next-line @stylistic/max-len
     // eslint-disable-next-line func-names, no-empty-function, prefer-arrow-callback
     new (Object.getPrototypeOf(async function() { })
       .constructor)(`return '${val}'`),
