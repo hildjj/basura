@@ -8,3 +8,4 @@ node_modules/
 TODO
 types/
 data/ucd/
+.pnpm-store/
