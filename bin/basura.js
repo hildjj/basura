@@ -103,7 +103,7 @@ if (opts.import) {
 
 function stringify(obj) {
   if (opts.json) {
-    return JSON.stringify(obj, null, 2);
+    return `${JSON.stringify(obj, null, 2)}\n`;
   }
   if (opts.edn || opts.cbor) {
     registerEncoder(Buffer, b => [
@@ -120,12 +120,12 @@ function stringify(obj) {
   if (opts.cbor) {
     return encode(obj, {avoidInts: true});
   }
-  return util.inspect(obj, {
+  return `${util.inspect(obj, {
     depth: Infinity,
     colors: !opts.output && process.stdout.isTTY,
     maxArrayLength: Infinity,
     maxStringLength: Infinity,
-  });
+  })}\n`;
 }
 
 function main() {
@@ -156,8 +156,7 @@ function main() {
       out.write('export default ');
     }
   }
-  out.write(str);
-  out.end('\n');
+  out.end(str);
 }
 
 main();

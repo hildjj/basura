@@ -1,8 +1,10 @@
 import {Basura} from '../lib/index.js';
 import {Buffer} from 'node:buffer';
+import {decode} from 'cbor2';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
+import {parseEDN} from 'cbor-edn';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
 import test from 'ava';
@@ -49,7 +51,7 @@ function exec(bin, opts = {}) {
       const buf = Buffer.concat(bufs);
       const str = buf.toString(opts.encoding);
       if (code === 0) {
-        resolve(str);
+        resolve(opts.encoding === 'binary' ? buf : str);
       } else {
         const err = new Error(`process fail, code ${code}`);
         err.buf = buf;
@@ -95,6 +97,16 @@ test('arrayLength', async t => {
 test('json', async t => {
   const txt = await exec('basura', {args: ['-j']});
   t.notThrows(() => JSON.parse(txt));
+});
+
+test('cbor', async t => {
+  const c = await exec('basura', {args: ['-C'], encoding: 'binary'});
+  t.notThrows(() => decode(c));
+});
+
+test('edn', async t => {
+  const e = await exec('basura', {args: ['-E']});
+  t.notThrows(() => parseEDN(e));
 });
 
 test('list types', async t => {
