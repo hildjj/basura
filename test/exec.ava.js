@@ -100,7 +100,7 @@ test('json', async t => {
 });
 
 test('cbor', async t => {
-  const c = await exec('basura', {args: ['-C'], encoding: 'binary'});
+  const c = await exec('basura', {args: ['-C', '-t', 'Buffer'], encoding: 'binary'});
   t.notThrows(() => decode(c));
 });
 
