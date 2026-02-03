@@ -1,10 +1,13 @@
 #!/usr/bin/env -S node
 
-import {Command, InvalidOptionArgumentError} from 'commander';
+import {Command, InvalidOptionArgumentError, Option} from 'commander';
+import {diagnose, encode} from 'cbor2';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {Basura} from '../lib/index.js';
+import {Buffer} from 'node:buffer';
 import fs from 'node:fs';
 import path from 'node:path';
+import {registerEncoder} from 'cbor2/encoder';
 import util from 'node:util';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,14 +53,24 @@ const opts = program
   )
   .option('-b, --noBoxed', 'Do not generate boxed types, like String.')
   .option('-c, --cborSafe', 'Do not generate types that break CBOR.')
+  .addOption(new Option('-C, --cbor', 'Output CBOR.  Implies --cborSafe.')
+    .implies({cborSafe: true})
+    .conflicts('json')
+    .conflicts('jsonSafe'))
   .option('-d, --depth <number>', 'Maximum depth.', myParseInt, 5)
   .option('-e, --edgeFreq <number>', 'Edge case frequency.', myParse01, 0.1)
+  .addOption(new Option('-E, --edn', 'Output as EDN.  Implies --cborSafe')
+    .implies('cborSafe')
+    .conflicts('json')
+    .conflicts('cbor'))
   .option(
     '-i, --import <files>',
     'Import the given files (comma-separated), and use its default export as an additional type generator.  Can be specified multiple times.',
     myParseArray
   )
-  .option('-j, --json', 'Output JSON, not generating any types that will not fit.')
+  .addOption(new Option('-j, --json', 'Output JSON.  Implies --jsonSafe.')
+    .implies({jsonSafe: true}))
+  .option('--jsonSafe', 'Do not generate types that break JSON.')
   .option('-o, --output <file>', 'File to output.')
   .option(
     '-s, --stringLength <number>', 'Maximum string length.', myParseInt, 20
@@ -74,10 +87,6 @@ Examples:
   .parse(process.argv)
   .opts();
 
-if (opts.json) {
-  opts.jsonSafe = true;
-}
-
 opts.types = {};
 opts.fakeSymbols = true;
 
@@ -90,6 +99,33 @@ if (opts.import) {
     const nm = m ? m.groups.cls : f.name;
     opts.types[nm] = f;
   }
+}
+
+function stringify(obj) {
+  if (opts.json) {
+    return `${JSON.stringify(obj, null, 2)}\n`;
+  }
+  if (opts.edn || opts.cbor) {
+    registerEncoder(Buffer, b => [
+      // Don't write a tag
+      NaN,
+      // New view on the ArrayBuffer, without copying bytes
+      new Uint8Array(b.buffer, b.byteOffset, b.byteLength),
+    ]);
+  }
+  if (opts.edn) {
+    const c = encode(obj, {avoidInts: true});
+    return diagnose(c);
+  }
+  if (opts.cbor) {
+    return encode(obj, {avoidInts: true});
+  }
+  return `${util.inspect(obj, {
+    depth: Infinity,
+    colors: !opts.output && process.stdout.isTTY,
+    maxArrayLength: Infinity,
+    maxStringLength: Infinity,
+  })}\n`;
 }
 
 function main() {
@@ -109,14 +145,7 @@ function main() {
     obj = g.generate();
   }
 
-  const str = opts.json ?
-    JSON.stringify(obj, null, 2) :
-    util.inspect(obj, {
-      depth: Infinity,
-      colors: !opts.output && process.stdout.isTTY,
-      maxArrayLength: Infinity,
-      maxStringLength: Infinity,
-    });
+  const str = stringify(obj);
 
   let out = process.stdout;
   if (opts.output) {
@@ -127,8 +156,7 @@ function main() {
       out.write('export default ');
     }
   }
-  out.write(str);
-  out.end('\n');
+  out.end(str);
 }
 
 main();
