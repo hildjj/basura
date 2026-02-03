@@ -17,6 +17,9 @@ importers:
       '@cto.af/unicode-trie-runtime':
         specifier: 3.2.6
         version: 3.2.6
+      cbor2:
+        specifier: ^2.2.1
+        version: 2.2.1
       commander:
         specifier: ^14.0.3
         version: 14.0.3
@@ -95,6 +98,10 @@ packages:
 
   '@cto.af/utils@1.2.2':
     resolution: {integrity: sha512-9BIPz9f1iBXFdN2NftF1IIjiNMhRfh0S6DWBmNqjDoo/6kOZcE2Xey1cfU1jgFjXYcq0x1s+TAfEOTfaDq/JXQ==}
+    engines: {node: '>=20'}
+
+  '@cto.af/wtf8@0.0.4':
+    resolution: {integrity: sha512-GbVy/i3DNrlp6klsqA7MatSERqp338xeWdMDHSGMxUKE19hC2Yk2dydLL0LtNC9Kjbb5bXbdwHHKa/mtnIRTZw==}
     engines: {node: '>=20'}
 
   '@es-joy/jsdoccomment@0.83.0':
@@ -412,6 +419,10 @@ packages:
   callsites@4.2.0:
     resolution: {integrity: sha512-kfzR4zzQtAE9PC7CzZsjl3aBNbXWuXiSeOCdLcPpBfGW8YuCqQHcRPFDbr/BPVmd3EEPVpuFzLyuT/cUhPr4OQ==}
     engines: {node: '>=12.20'}
+
+  cbor2@2.2.1:
+    resolution: {integrity: sha512-gZrpQweRAfue3Gmd4pG+AakX1zqVrOmXsu+2FwfUfFyYujNGSAOp81iPbHgnG212Xr3KV5vZXxxCXQRbWjZCWw==}
+    engines: {node: '>=20'}
 
   cbor@10.0.10:
     resolution: {integrity: sha512-EirvzAg0G4okCsdTfTjLWHU+tToQ2V2ptO3577Vyy2GOTeVJad99uCIuDqdK7ppFRRcEuigyJY6TJ59wv5JpSg==}
@@ -1577,6 +1588,8 @@ snapshots:
 
   '@cto.af/utils@1.2.2': {}
 
+  '@cto.af/wtf8@0.0.4': {}
+
   '@es-joy/jsdoccomment@0.83.0':
     dependencies:
       '@types/estree': 1.0.8
@@ -1944,6 +1957,10 @@ snapshots:
   callsites@3.1.0: {}
 
   callsites@4.2.0: {}
+
+  cbor2@2.2.1:
+    dependencies:
+      '@cto.af/wtf8': 0.0.4
 
   cbor@10.0.10:
     dependencies:

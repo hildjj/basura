@@ -48,6 +48,7 @@
     "@cto.af/random": "2.1.1",
     "@cto.af/unicode-trie": "3.2.6",
     "@cto.af/unicode-trie-runtime": "3.2.6",
+    "cbor2": "^2.2.1",
     "commander": "^14.0.3",
     "tlds2": "2.2.19"
   },
