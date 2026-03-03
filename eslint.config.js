@@ -22,6 +22,12 @@ export default [
   },
   ...ava,
   {
+    files: ['**/*.ava.js'],
+    rules: {
+      'ava/no-conditional-assertion': 'off',
+    },
+  },
+  {
     files: ['bin/*.js'],
     rules: {
       'no-console': 'off',
