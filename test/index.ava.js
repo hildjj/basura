@@ -261,6 +261,7 @@ test('Promise', async t => {
 });
 
 test('unhandled reject ok', t => new Promise((resolve, _reject) => {
+  t.plan(1);
   Promise.reject(new Error('Testing unhandled', {cause: 'BasuraGenerated'}));
   process.nextTick(() => {
     t.pass();
@@ -308,7 +309,7 @@ test('WeakRef', t => {
 test('Generator', t => {
   const {a, o} = t.context;
   const obj = [/baz/, 12];
-  const gen = (function *gen() {
+  const gen = (function *ygen() {
     yield *obj;
   }());
   a.weakMembers.set(gen, obj);

@@ -1,11 +1,11 @@
 .DS_Store
 .nyc_output/
+.pnpm-store/
 .vscode/
 *.js.map
 coverage/
+data/ucd/
 docs/
 node_modules/
 TODO
 types/
-data/ucd/
-.pnpm-store/
