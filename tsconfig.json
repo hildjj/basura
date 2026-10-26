@@ -11,5 +11,7 @@
     "module": "nodenext",
     "outDir": "types",
     "target": "ES2022",
+    "rootDir": "./lib",
+    "types": ["node"]
   }
 }

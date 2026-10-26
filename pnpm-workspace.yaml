@@ -1,0 +1,4 @@
+minimumReleaseAgeExclude:
+  - '@cto.af/random@3.0.0'
+  - '@cto.af/wtf8@1.0.0'
+  - cbor2@2.4.1

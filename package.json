@@ -14,7 +14,7 @@
     "types/*"
   ],
   "scripts": {
-    "clean": "rm -rf coverage docs data/*.json lib/data.js",
+    "clean": "rm -rf coverage docs types data/*.json lib/data.js",
     "lint": "eslint .",
     "data": "node tools/create.js",
     "docs": "typedoc",
@@ -45,28 +45,29 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@cto.af/random": "2.1.2",
-    "@cto.af/unicode-trie": "3.2.9",
-    "@cto.af/unicode-trie-runtime": "3.2.9",
-    "cbor2": "^2.3.0",
-    "commander": "^14.0.3",
+    "@cto.af/random": "3.0.0",
+    "@cto.af/unicode-trie": "3.2.11",
+    "@cto.af/unicode-trie-runtime": "3.2.11",
+    "cbor2": "^2.4.1",
+    "commander": "^15.0.0",
     "tlds2": "^2.2.19"
   },
   "devDependencies": {
-    "@cto.af/eslint-config": "^6.2.5",
-    "@fast-csv/parse": "^5.0.5",
-    "@types/node": "^25.5.0",
-    "ava": "^7.0.0",
+    "@cto.af/eslint-config": "^7.0.3",
+    "@fast-csv/parse": "^5.0.8",
+    "@types/node": "^26.6.5",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "ava": "^8.1.0",
     "cbor-edn": "^0.2.2",
     "codepoints": "^1.3.0",
-    "eslint": "^10.1.0",
-    "eslint-plugin-ava": "^16.0.0",
-    "eslint-plugin-jsdoc": "^62.8.0",
-    "superc8": "^12.3.1",
-    "typedoc": "^0.28.17",
-    "typescript": "^5.9.3"
+    "eslint": "^10.13.0",
+    "eslint-plugin-ava": "^18.0.0",
+    "eslint-plugin-jsdoc": "^65.3.12",
+    "superc8": "^12.7.0",
+    "typedoc": "^0.28.20",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@12.14.0",
   "engines": {
     "node": ">=20.4"
   }
