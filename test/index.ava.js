@@ -145,6 +145,7 @@ test('functions', t => {
     // [AsyncFunction: anonymous]
     // eslint-disable-next-line func-names, no-empty-function, prefer-arrow-callback
     new (Object.getPrototypeOf(async function() { })
+      // eslint-disable-next-line new-cap
       .constructor)(`return '${val}'`),
     // [AsyncFunction: f1]
     // eslint-disable-next-line no-eval
@@ -161,6 +162,7 @@ test('functions', t => {
     // [GeneratorFunction: anonymous]
     // eslint-disable-next-line func-names, no-empty-function
     new (Object.getPrototypeOf(function *() { })
+      // eslint-disable-next-line new-cap
       .constructor)(`yield '${val}'`),
     // [GeneratorFunction: f1]
     // eslint-disable-next-line no-eval
@@ -175,6 +177,7 @@ test('functions', t => {
     // [AsyncGeneratorFunction: anonymous]
     // eslint-disable-next-line func-names, no-empty-function
     new (Object.getPrototypeOf(async function *() { })
+      // eslint-disable-next-line new-cap
       .constructor)(`yield '${val}'`),
     //
     // case '[AsyncGeneratorFunction: f1]':

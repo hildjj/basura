@@ -140,7 +140,11 @@ function main() {
   if (opts.type) {
     const t = opts.type;
     delete opts.type;
-    obj = g.types[t].call(g);
+    const typ = g.types[t];
+    if (!typ) {
+      throw new Error(`Unknown type: "${t}"`);
+    }
+    obj = typ.call(g);
   } else {
     obj = g.generate();
   }

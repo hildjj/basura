@@ -2,7 +2,7 @@ import {Scripts, ZALGO} from '../../lib/scripts.js';
 import {Basura} from '../../lib/index.js';
 import {Buffer} from 'node:buffer';
 import {Modnar} from '@cto.af/random/test';
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import {decorateMethod} from '../../lib/decorators.js';
 import tlds from 'tlds2';
 import util from 'node:util';

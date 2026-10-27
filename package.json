@@ -10,7 +10,7 @@
   "files": [
     "bin/*",
     "data/data.json",
-    "lib/*",
+    "lib/*.js",
     "types/*"
   ],
   "scripts": {
@@ -69,6 +69,6 @@
   },
   "packageManager": "pnpm@12.14.0",
   "engines": {
-    "node": ">=20.4"
+    "node": ">=22"
   }
 }

@@ -7,6 +7,7 @@ export default [
     ignores: [
       'types/**',
       'examples/**',
+      'data/data.json',
     ],
   },
   ...es6,
@@ -25,6 +26,7 @@ export default [
     files: ['**/*.ava.js'],
     rules: {
       'ava/no-conditional-assertion': 'off',
+      'ava/no-ava-in-dependencies': 'off',
     },
   },
   {
