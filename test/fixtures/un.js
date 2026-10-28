@@ -230,7 +230,9 @@ export class Arusab extends Basura {
   }
 
   generate_TypedArray(ary, depth = 0) {
-    const construct = (ary instanceof SharedArrayBuffer) ? ArrayBuffer : ary.constructor;
+    const construct = (ary instanceof SharedArrayBuffer) ?
+      ArrayBuffer :
+      ary.constructor;
     this.rand.pick(
       construct,
       this.typedArrays,
@@ -424,7 +426,8 @@ export class Arusab extends Basura {
       case 'object':
         if (!o) {
           typ = 'null';
-        } else if (this.typedArrays.includes(o.constructor) || (o.constructor === SharedArrayBuffer)) {
+        } else if (this.typedArrays.includes(o.constructor) ||
+                   (o.constructor === SharedArrayBuffer)) {
           typ = 'TypedArray';
         } else if (this[`generate_${o.constructor.name}`]) {
           typ = o.constructor.name;

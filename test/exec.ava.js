@@ -172,4 +172,4 @@ test('imports', async t => {
 
 test('bad type', async t => {
   await t.throwsAsync(() => exec('basura', {args: ['-t', 'Foo']}));
-})
+});
