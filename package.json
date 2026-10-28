@@ -1,6 +1,6 @@
 {
   "name": "basura",
-  "version": "4.3.3",
+  "version": "5.0.0",
   "main": "lib/index.js",
   "type": "module",
   "bin": {
