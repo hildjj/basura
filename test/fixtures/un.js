@@ -2,7 +2,7 @@ import {Scripts, ZALGO} from '../../lib/scripts.js';
 import {Basura} from '../../lib/index.js';
 import {Buffer} from 'node:buffer';
 import {Modnar} from '@cto.af/random/test';
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import {decorateMethod} from '../../lib/decorators.js';
 import tlds from 'tlds2';
 import util from 'node:util';
@@ -230,8 +230,11 @@ export class Arusab extends Basura {
   }
 
   generate_TypedArray(ary, depth = 0) {
+    const construct = (ary instanceof SharedArrayBuffer) ?
+      ArrayBuffer :
+      ary.constructor;
     this.rand.pick(
-      ary.constructor,
+      construct,
       this.typedArrays,
       'TypedArray type'
     );
@@ -240,11 +243,23 @@ export class Arusab extends Basura {
       this.rand.upto(
         ary.byteLength / sz,
         this.opts.arrayLength,
-        `${ary.constructor.name} len`
+        `${construct.name} len`
       );
     }
-    const buf = Buffer.from(ary.buffer || ary, ary.byteOffset, ary.byteLength);
-    this.rand.bytes(buf, ary.constructor.name);
+    switch (ary.constructor) {
+      case ArrayBuffer:
+        this.rand.random(0.9, 'SharedArrayBuffer edgeFreq');
+        break;
+      case SharedArrayBuffer:
+        this.rand.random(0, 'SharedArrayBuffer edgeFreq');
+        break;
+      default:
+        this.rand.random((ary.buffer instanceof SharedArrayBuffer) ? 0 : 0.9, 'SharedArrayBuffer edgeFreq');
+        break;
+    }
+
+    const buf = Buffer.from(ary.buffer ?? ary, ary.byteOffset, ary.byteLength);
+    this.rand.bytes(buf, construct.name);
   }
 
   generate_Object(obj, depth = 0) {
@@ -411,7 +426,8 @@ export class Arusab extends Basura {
       case 'object':
         if (!o) {
           typ = 'null';
-        } else if (this.typedArrays.includes(o.constructor)) {
+        } else if (this.typedArrays.includes(o.constructor) ||
+                   (o.constructor === SharedArrayBuffer)) {
           typ = 'TypedArray';
         } else if (this[`generate_${o.constructor.name}`]) {
           typ = o.constructor.name;

@@ -169,3 +169,7 @@ test('imports', async t => {
     args: ['-i', './test/fixtures/custom_min.js', '-t', 'min'],
   }), '4\n');
 });
+
+test('bad type', async t => {
+  await t.throwsAsync(() => exec('basura', {args: ['-t', 'Foo']}));
+});
