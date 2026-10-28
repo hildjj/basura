@@ -57,6 +57,7 @@ export default [
   new SharedArrayBuffer(13),
   new DataView(new ArrayBuffer(14)),
   new DataView(new SharedArrayBuffer(15)),
+  new Uint8Array(new SharedArrayBuffer(16)),
   new Proxy({a: 1, b: 2}, {}),
   new URL('https://example.com'),
   new URL('https://example.com:4000'),
